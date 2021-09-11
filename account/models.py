@@ -27,7 +27,8 @@ class User(AbstractUser):
                         'unique' : 'そのユーザー名は既に使われています。'
                     },
                 )
-
+    email = models.EmailField('email_address', null=False)
+    
     class Meta:
         db_table = 'users'
         swappable = 'AUTH_USER_MODEL'
