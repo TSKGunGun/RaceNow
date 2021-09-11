@@ -10,16 +10,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Righteous&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
     <title>RaceNow|{% block title %}{% endblock %}</title>
 </head>
 <body class="h-100 vstack" style="padding:60px 0">
-    <nav class="navbar navbar-expand-lg bg-dark navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-md bg-dark navbar-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" style="font-family: 'Righteous', cursive;" href="{% url "index" %}">
                 <i class="fas fa-flag-checkered"></i>
                 RaceNow
             </a>
+            <div class="d-block d-md-none ms-auto">
+                <a class="btn btn-outline-info" href="#">新規登録</a>    
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -28,18 +32,24 @@
                     <li class="nav-item" aria-current="page">
                         <a class="nav-link active" href="#">レース検索</a>
                     </li>
+                    <div class="d-block d-md-none">
+                        <li class="nav-item" aria-current="page">
+                            <a class="nav-link text-info" href="{% url 'login' %}"><i class="bi bi-key me-2"></i>ログイン</a>    
+                        </li>
+                    </div>
                 </ul>
-            
             </div>
-            {% if user.is_authenticated %}
+            <div class="d-none d-md-block d-lg-block d-xl-block">
+                {% if user.is_authenticated %}
                 <div class="align-items-center me-3 text-light">
                     {{ user.username }}としてログイン中
                 </div>
                 <a class="btn btn-outline-light" href="{% url 'logout' %}">ログアウト</a>
-            {% else %}
-                <a class="btn btn-outline-light me-2" href="{% url 'login' %}">ログイン</a>    
+                {% else %}
+                <a class="btn btn-outline-light me-2 " href="{% url 'login' %}">ログイン</a>    
                 <a class="btn btn-outline-info" href="#">新規登録</a>    
-            {% endif %}
+                {% endif %}
+            </div>
         </div>
     </nav>
     {% block contents %}
