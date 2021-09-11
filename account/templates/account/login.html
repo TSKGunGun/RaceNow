@@ -4,11 +4,11 @@
 {% block title %}Login{% endblock %}
 
 {% block contents %}
-<section class="container gap-2">
+<section class="container my-2">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header bg-dark text-light">
+                <div class="card-header bg-dark text-light h2 text-center p-3">
                     ログイン
                 </div>
                 <div class="card-body">
@@ -18,6 +18,9 @@
                         {% bootstrap_form form %}
                         {% bootstrap_button type="submit" content="ログイン" %}
                     </form>    
+                </div>
+                <div class="card-footer bg-dark text-light small text-center">
+                    RaceNow@2021
                 </div>
             </div>
         </div>
