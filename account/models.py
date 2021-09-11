@@ -7,7 +7,6 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.utils import timezone
 
-
 @deconstructible
 class CustomUsernameValidator(validators.RegexValidator):
     regex = r'^[\w_]+\Z'
@@ -28,6 +27,18 @@ class User(AbstractUser):
                         'unique' : 'そのユーザー名は既に使われています。'
                     },
                 )
+
     class Meta:
         db_table = 'users'
         swappable = 'AUTH_USER_MODEL'
+
+#organizer
+class Organizer(models.Model):
+    owner = models.ForeignKey(User, verbose_name="owner",null=False, on_delete=models.CASCADE)
+    name = models.CharField(verbose_name="name", max_length=100, null=False)
+    email_address = models.EmailField(verbose_name="email_address", null=False)
+    is_active = models.BooleanField(verbose_name="is_active", default=True)
+    url = models.URLField(verbose_name="homepage_url", null=False)
+
+    class Meta:
+        db_table = 'organizers'
