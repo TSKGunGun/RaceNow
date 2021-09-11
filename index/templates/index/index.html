@@ -1,7 +1,18 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}Index{% endblock %}
 
 {% block contents %}
-<p class="display-5">HelloWorld</p>
+<section class="container-fluid">
+    <div class="row align-items-center" style="background-color: #80ffbf;">
+        <div class="col-md-8 text-center">
+            <p class="display-1" style="font-family: 'Luckiest Guy', cursive; color: #ff80bf;">WELCOM TO RACENOW!</p>
+            <p style="color: #1a3326; font-family: 'Kosugi Maru'" class="h8">RaceNowは、様々なレースのライブリザルトが閲覧できるWebページです。</p>
+        </div>
+        <div class="col-md-4 p-3 text-center">
+            <img src="{% static 'index/header.svg' %}" class="img-fluid" style="width: 70%; height: auto;" >
+        </div>
+    </div>
+</section>
+
 {% endblock %}
