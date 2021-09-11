@@ -1,12 +1,15 @@
+{% load django_bootstrap5 %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% bootstrap_css %}
     <title>HelloWOrld</title>
 </head>
 <body>
-    <p>HelloWorld</p>
+    <p class="display-5">HelloWorld</p>
+    {% bootstrap_javascript %}
 </body>
 </html>
