@@ -1,4 +1,6 @@
 from operator import truediv
+
+from django.http import response
 from racenow.settings import AUTH_USER_MODEL
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -48,3 +50,16 @@ class Organizer_Create_Test(TestCase):
         org.save()
         create_org = Organizer.objects.first()
         self.assertEqual(org.name, name)
+
+class LoginView_Test(TestCase):
+    def test_request_login(self):
+        response = self.client.get('/login/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "account/login.html")
+
+class LogoutView_Test(TestCase):
+    def test_request_logout(self):
+        response = self.client.get('/logout/')
+
+        self.assertEqual(response.status_code, 200)
