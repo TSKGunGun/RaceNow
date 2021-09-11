@@ -1,14 +1,30 @@
+from operator import truediv
 from racenow.settings import AUTH_USER_MODEL
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import User
 
 # Create your tests here.
-class UserModelTest(TestCase):
-    def test_getcustomuser_getusermodel(self):
-        custom_user_model = User
-        self.assertEqual(custom_user_model, get_user_model())
+class UserModel_Create_Test(TestCase):
+    def test_normaluser_create(self):
+        username = "test"
+        user=get_user_model().objects.create_user(
+            username=username, 
+            password="password")
+        user.save()
 
-    def test_getcustomuser_auth_user(self):
-        custom_user_model = User()
-        self.assertEqual(custom_user_model, AUTH_USER_MODEL)
+        createuser = get_user_model().objects.all().first()
+
+        self.assertEqual(createuser.username, username)
+        self.assertEqual(createuser.is_staff, False)
+    
+    def test_staffuser_create(self):
+        username = "test"
+        user=get_user_model().objects.create_user(
+            username=username, 
+            password="password", is_staff=True)
+        user.save()
+
+        createuser = get_user_model().objects.all().first()
+
+        self.assertEqual(createuser.username, username)
+        self.assertEqual(createuser.is_staff, True)
