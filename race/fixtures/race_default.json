@@ -1,1 +1,40 @@
-[{"model": "race.category", "pk": 1, "fields": {"name": "オンロードレース"}}, {"model": "race.category", "pk": 2, "fields": {"name": "オフロードレース"}}, {"model": "race.racetype", "pk": 1, "fields": {"category": 1, "name": "サーキット"}}, {"model": "race.racetype", "pk": 2, "fields": {"category": 2, "name": "モトクロス"}}, {"model": "race.racetype", "pk": 3, "fields": {"category": 2, "name": "クロスカントリー"}}]
+[
+    {
+        "model": "race.category", 
+        "pk": 1, 
+        "fields": {
+            "name": "オンロードレース"
+        }
+    },
+    {
+        "model": "race.category",
+        "pk": 2, 
+        "fields": {
+            "name": "オフロードレース"
+        }
+    }, 
+    {
+        "model": "race.racetype",
+        "pk": 1, 
+        "fields": {
+            "category": 1, 
+            "name": "サーキット"
+        }
+    }, 
+    {
+        "model": "race.racetype", 
+        "pk": 2, 
+        "fields": {
+            "category": 2,
+            "name": "モトクロス"
+        }
+    }, 
+    {
+        "model": "race.racetype",
+        "pk": 3, 
+        "fields": {
+            "category": 2,
+            "name": "クロスカントリー"
+        }
+    }
+]
