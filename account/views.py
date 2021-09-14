@@ -6,3 +6,4 @@ from .forms import CustomUserCreationForm
 class CreateUserView(CreateView):
     template_name = "account/create_user.html"
     form_class = CustomUserCreationForm
+    success_url = "/"

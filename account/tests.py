@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .models import Organizer, User, CustomUsernameValidator
-from django.contrib.auth.forms import UserCreationForm
+from .forms import CustomUserCreationForm
+from .views import CreateUserView
 
 # Create your tests here.
 class UserModel_Create_Test(TestCase):
@@ -100,3 +101,63 @@ class CreateUserView_Test(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "account/create_user.html")
+
+    def test_view_create(self):
+        params = {
+            "username": "test_user",
+            "password1": "J0WOe9eH",
+            "password2": "J0WOe9eH"
+        }
+
+        self.assertEqual(get_user_model().objects.count(), 0)
+        response = self.client.post("/account/create", data=params)
+
+        self.assertEqual(get_user_model().objects.count(), 1)
+        
+        createuser = get_user_model().objects.first()
+        self.assertEqual(createuser.username, params["username"])
+        self.assertRedirects(response, "/")
+
+
+class CreateUserForm_Test(TestCase):
+    def test_form_create(self):
+        params = {
+            "username": "test_user",
+            "password1": "J0WOe9eH",
+            "password2": "J0WOe9eH"
+        }
+
+        user = User()
+        form = CustomUserCreationForm(params, instance=user)
+        form.is_valid()
+
+        self.assertEqual(get_user_model().objects.count(), 0)
+        form.save()
+
+        self.assertEqual(get_user_model().objects.count(), 1)
+        
+        createuser = get_user_model().objects.first()
+        self.assertEqual(createuser.username, params["username"])
+    
+    def test_form_validate(self):
+        valid_params = {
+            "username": "test_user",
+            "password1": "J0WOe9eH",
+            "password2": "J0WOe9eH"
+        }
+        
+        invalid_params = {
+            "username": "test-user",
+            "password1": "J0WOe9eH",
+            "password2": "J0WOe9eH"
+        }
+
+        user = User()
+        form = CustomUserCreationForm(valid_params, instance=user)
+        form.is_valid()
+        self.assertEquals(len(form.errors), 0)
+
+        form = CustomUserCreationForm(invalid_params, instance=user)
+        form.is_valid()
+        self.assertEquals(len(form.errors), 1)
+        self.assertTrue(  "ユーザ名は英数字,もしくはアンダーバー(_)のみが使用できます。" in form.errors.as_text() )
