@@ -40,6 +40,7 @@ class Organizer(models.Model):
     email_address = models.EmailField(verbose_name="email_address", null=False)
     is_active = models.BooleanField(verbose_name="is_active", default=True)
     url = models.URLField(verbose_name="homepage_url", null=False)
+    members = models.ManyToManyField(User, related_name="organizers", related_query_name="organizer")
 
     class Meta:
         db_table = 'organizers'
