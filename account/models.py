@@ -1,5 +1,5 @@
 
-from asyncio.constants import DEBUG_STACK_DEPTH
+import re
 from django.core import validators
 from django.utils.deconstruct import deconstructible
 from django.db import models
@@ -12,7 +12,7 @@ class CustomUsernameValidator(validators.RegexValidator):
     regex = r'^[\w_]+\Z'
     message = 'ユーザ名は英数字,もしくはアンダーバー(_)のみが使用できます。'
     
-    flags = 0
+    flags = re.ASCII
 
 # Create your models here.
 class User(AbstractUser):
@@ -22,7 +22,7 @@ class User(AbstractUser):
                     null=False, 
                     unique=True, 
                     validators=[username_validator],
-                    help_text='ユーザ名は',
+                    help_text='ユーザ名は50文字以下で、英数字,もしくはアンダーバー(_)のみが使用できます。',
                     error_messages={
                         'unique' : 'そのユーザー名は既に使われています。'
                     },
@@ -47,3 +47,4 @@ class Organizer(models.Model):
 
     class Meta:
         db_table = 'organizers'
+

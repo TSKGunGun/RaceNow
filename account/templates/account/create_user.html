@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}アカウント新規作成{% endblock %}
+
+{% block contents %}
+<section class="container py-2">
+    <div class="row justify-content-center">
+        <p class="display-5 text-center">新規登録</p>
+    </div>
+    <div class="row justify-content-center">
+        <form action="{% url 'account_create' %}" method="POST">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            {% bootstrap_button type="submit" content="ユーザー作成" %}
+        </form>
+    </div>
+</section>
+{% endblock %}

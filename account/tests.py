@@ -1,8 +1,9 @@
 from django import test
-from django.test import TestCase, Client
+from django.core.exceptions import ValidationError
+from django.test import TestCase
 from django.contrib.auth import get_user_model
-from django.contrib import auth
-from .models import Organizer
+from .models import Organizer, User, CustomUsernameValidator
+from django.contrib.auth.forms import UserCreationForm
 
 # Create your tests here.
 class UserModel_Create_Test(TestCase):
@@ -29,6 +30,21 @@ class UserModel_Create_Test(TestCase):
 
         self.assertEqual(createuser.username, username)
         self.assertEqual(createuser.is_staff, True)
+
+class Username_Validation_Test(TestCase):
+    def test_username_validator(self):
+        valid_usernames = ["test", "test_test", "test123456789", "abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
+        invalid_usernames = ["あああ", "test-test", "αα", "亜亜"]
+        validator = CustomUsernameValidator()
+
+        for valid in valid_usernames:
+            with self.subTest(valid=valid):
+                validator(valid)
+        
+        for invalid in invalid_usernames:
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(ValidationError):
+                    validator(invalid)
 
 class Organizer_Create_Test(TestCase):
     def setUp(self) -> None:
@@ -77,3 +93,10 @@ class Organizer_Model_Test(TestCase):
         test_organizer.members.add(self.user)
         self.assertEqual(1, len(test_organizer.members.all()))
         self.assertEqual(test_organizer.members.all().first(), self.user)
+
+class CreateUserView_Test(TestCase):
+    def test_view_response(self):
+        response = self.client.get('/account/create')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "account/create_user.html")

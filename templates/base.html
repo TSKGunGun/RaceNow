@@ -23,7 +23,7 @@
                 RaceNow
             </a>
             <div class="d-block d-md-none ms-auto">
-                <a class="btn btn-outline-info" href="#">新規登録</a>    
+                <a class="btn btn-outline-info" href="{% url 'account_create' %}">新規登録</a>    
             </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -48,7 +48,7 @@
                 <a class="btn btn-outline-light" href="{% url 'logout' %}">ログアウト</a>
                 {% else %}
                 <a class="btn btn-outline-light me-2 " href="{% url 'login' %}">ログイン</a>    
-                <a class="btn btn-outline-info" href="#">新規登録</a>    
+                <a class="btn btn-outline-info" href="{% url 'account_create' %}">新規登録</a>    
                 {% endif %}
             </div>
         </div>
