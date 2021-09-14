@@ -1,3 +1,4 @@
+from django import test
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.contrib import auth
@@ -54,3 +55,25 @@ class LoginView_Test(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "account/login.html")
+
+
+class Organizer_Model_Test(TestCase):
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.create_user(
+            username="testuser",
+            password="password"
+        )
+
+    def test_is_organizer_member(self):
+        test_organizer = Organizer.objects.create(
+            owner = self.user,
+            name = "test_organizer",
+            email_address = "test@example.com",
+            url = "test@example.com"
+        )
+
+        self.assertEqual(0, len(test_organizer.members.all()))
+        
+        test_organizer.members.add(self.user)
+        self.assertEqual(1, len(test_organizer.members.all()))
+        self.assertEqual(test_organizer.members.all().first(), self.user)
