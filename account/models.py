@@ -42,5 +42,8 @@ class Organizer(models.Model):
     url = models.URLField(verbose_name="homepage_url", null=False)
     members = models.ManyToManyField(User, related_name="organizers", related_query_name="organizer")
 
+    def __str__(self) -> str:
+        return self.name
+
     class Meta:
         db_table = 'organizers'
