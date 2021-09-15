@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}アカウント情報{% endblock %}
+
+{% block contents %}
+<section class="container py-2">
+    <div class="row">
+        <p class="display-5">ユーザー情報</p>
+    </div>
+    <div class="my-2"></div>
+    <div class="row">
+        <div class="col-md-8">
+            <p class="h5">ユーザー基本情報</p>
+            <table class="table my-2">
+                <tr>
+                    <th>ユーザ名</th>
+                    <td>{{ object.username }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="row my-5">
+        <div class="col-md-8">
+            <p class="h5">所属しているレース主催団体</p>
+            <table class="table">
+                <tr>
+                    <th>団体名</th>
+                    <th>直近のレース</th>
+                    <th>その他</th>
+                </tr>
+                {% for org in object.organizer_set.all %}
+                <tr>
+                    <td>{{ org.name }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% if not object.organizer_set.all %}
+            <p class="display-4 m-3">所属主催団体なし</p> 
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django import test
 from django.core.exceptions import ValidationError
+from django.http import response
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from account.models import Organizer, User, CustomUsernameValidator
@@ -167,3 +168,56 @@ class CreateUserForm_Test(TestCase):
         self.assertTrue(form2.is_valid())
         form2.save()
         self.assertEqual(get_user_model().objects.count(), 1)
+
+class UserProfile_Detail_Test(TestCase):
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.create_user(
+            username="testuser",
+            password="password"
+        )
+        self.client.logout()
+        self.client.force_login(self.user)
+    
+    def test_getresponse_detail(self):
+        response = self.client.get('/account/1/detail')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "testuser")
+        self.assertTemplateUsed('account/user_detail.html')
+
+    def test_getresponse_notfound(self):
+        response = self.client.get('/account/detail/2')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed('account/user_detail_notfound.html')
+
+class User_Organizers_Test(TestCase):
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.create_user(
+            username="testuser",
+            password="password"
+        )
+        self.org = Organizer.objects.create(
+            owner = self.user,
+            name="org1",
+            email_address = "test@example.com"
+        )
+
+    def test_get_user_orginers(self):
+        self.org.members.add(self.user)
+
+        self.assertEqual(self.org.members.count(), 1)
+
+        orgs = self.user.organizer_set.all()
+        self.assertEqual(orgs.count(), 1)
+        self.assertEqual(orgs.first().name, "org1")
+
+        org2 = Organizer.objects.create(
+            owner = self.user,
+            name="org2",
+            email_address = "test@example.com"
+        )
+        org2.members.add(self.user)
+        orgs = self.user.organizer_set.all()
+        self.assertEqual(orgs.count(), 2)
+        self.assertEqual(orgs.last().name, "org2")
