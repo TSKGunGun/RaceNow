@@ -44,8 +44,8 @@
                 {% if user.is_authenticated %}
                 <div class="align-items-center me-3 text-light">
                     {{ user.username }}としてログイン中
+                    <a class="btn btn-outline-light" href="{% url 'logout' %}">ログアウト</a>
                 </div>
-                <a class="btn btn-outline-light" href="{% url 'logout' %}">ログアウト</a>
                 {% else %}
                 <a class="btn btn-outline-light me-2 " href="{% url 'login' %}">ログイン</a>    
                 <a class="btn btn-outline-info" href="{% url 'account_create' %}">新規登録</a>    
