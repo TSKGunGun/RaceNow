@@ -208,7 +208,7 @@ class User_Organizers_Test(TestCase):
 
         self.assertEqual(self.org.members.count(), 1)
 
-        orgs = self.user.organizer_set.all()
+        orgs = self.user.organizers.all()
         self.assertEqual(orgs.count(), 1)
         self.assertEqual(orgs.first().name, "org1")
 
@@ -218,7 +218,7 @@ class User_Organizers_Test(TestCase):
             email_address = "test@example.com"
         )
         org2.members.add(self.user)
-        orgs = self.user.organizer_set.all()
+        orgs = self.user.organizers.all()
         self.assertEqual(orgs.count(), 2)
         self.assertEqual(orgs.last().name, "org2")
 
