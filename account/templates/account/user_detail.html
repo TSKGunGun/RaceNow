@@ -12,6 +12,7 @@
     <div class="row">
         <div class="col-md-8">
             <p class="h5">ユーザー基本情報</p>
+            <a href="#" class="btn btn-primary">基本情報を更新する</a>
             <table class="table my-2">
                 <tr>
                     <th>ユーザ名</th>
@@ -23,6 +24,7 @@
     <div class="row my-5">
         <div class="col-md-8">
             <p class="h5">所属しているレース主催団体</p>
+            <a href="#" class="btn btn-primary me-2 my-2">新しいレース主催団体を作成</a>
             <table class="table">
                 <tr>
                     <th>団体名</th>
@@ -32,6 +34,12 @@
                 {% for org in object.organizer_set.all %}
                 <tr>
                     <td>{{ org.name }}</td>
+                    <td></td>
+                    <td>
+                        <button type="button" class="btn btn-danger" id="showDeleteMsgModal" data-name="{{ org.name }}" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
+                            削除
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
             </table>
@@ -40,5 +48,34 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteMessageModal" tabindex="-1" aria-labelledby="deleteMessageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="deleteMessageModalLabel">主催団体の削除確認</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            この主催団体を削除してもよろしいですか？
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">キャンセル</button>
+            <button type="button" class="btn btn-danger">削除</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        var deleteMessageModal = document.getElementById('deleteMessageModal')
+        deleteMessageModal.addEventListener('show.bs.modal', function(event){
+            var deleteMessaageBody = deleteMessageModal.getElementsByClassName('modal-body')[0];
+            var deleteMessageBtn = event.relatedTarget;
+            var data = deleteMessageBtn.dataset.name;
+            deleteMessaageBody.innerText = data + 'を削除してもよろしいですか?';
+        })
+    </script>
 </section>
 {% endblock %}
