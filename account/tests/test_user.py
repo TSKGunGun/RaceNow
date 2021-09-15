@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from account.models import Organizer, User, CustomUsernameValidator
 from account.forms import CustomUserCreationForm
-from account.views import CreateUserView
+from account.views import CreateUserView, delete_organizer_member
 
 # Create your tests here.
 class UserModel_Create_Test(TestCase):
@@ -221,3 +221,40 @@ class User_Organizers_Test(TestCase):
         orgs = self.user.organizer_set.all()
         self.assertEqual(orgs.count(), 2)
         self.assertEqual(orgs.last().name, "org2")
+
+class Account_Detail_Test(TestCase):
+    def setUp(self) -> None:
+        self.testuser1 = get_user_model().objects.create_user(
+            username="testuser",
+            password="password"
+        )
+
+        self.testuser2 = get_user_model().objects.create_user(
+            username="testuser2",
+            password="password"
+        )
+
+        self.org = Organizer.objects.create(
+            owner = self.testuser1,
+            name="org1",
+            email_address = "test@example.com"
+        )
+        self.org.members.add(self.testuser1, self.testuser2)
+
+    def test_delete_organizer(self):
+        self.client.logout()
+        self.client.force_login(self.testuser1)
+        self.assertEqual(self.org.members.count(), 2)
+        
+        with self.assertRaises(ValidationError):
+            self.client.post( f'/account/deleteOrgMember/{self.org.id}')        
+
+        self.client.logout()
+        self.client.force_login(self.testuser2)
+        
+        response = self.client.post( f'/account/deleteOrgMember/{self.org.id}')
+        self.assertEqual(self.org.members.count(), 1)
+        self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")
+        
+    def test_delete_organizer_notlogin(self):
+        self.client.logout()

@@ -36,7 +36,7 @@
                     <td>{{ org.name }}</td>
                     <td></td>
                     <td>
-                        <button type="button" class="btn btn-danger" id="showDeleteMsgModal" data-name="{{ org.name }}" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
+                        <button type="button" class="btn btn-danger" data-name="{{ org.name }}" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
                             削除
                         </button>
                     </td>
@@ -62,7 +62,7 @@
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal">キャンセル</button>
-            <button type="button" class="btn btn-danger">削除</button>
+            <button id="OrgDelOkBtn" type="button" class="btn btn-danger" href="#">削除</button>
             </div>
         </div>
         </div>
@@ -73,7 +73,10 @@
         deleteMessageModal.addEventListener('show.bs.modal', function(event){
             var deleteMessaageBody = deleteMessageModal.getElementsByClassName('modal-body')[0];
             var deleteMessageBtn = event.relatedTarget;
+            
             var data = deleteMessageBtn.dataset.name;
+            var id = deleteMessageBtn.dataset.id;
+            
             deleteMessaageBody.innerText = data + 'を削除してもよろしいですか?';
         })
     </script>

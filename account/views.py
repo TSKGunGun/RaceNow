@@ -1,9 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, TemplateView, DetailView
 from .forms import CustomUserCreationForm
 from .models import Organizer, User
+from django.views.decorators.http import require_POST
+from django.core.exceptions import ValidationError
 
 # Create your views here.
 class CreateUserView(CreateView):
@@ -16,3 +18,18 @@ class UserDetailView(DetailView):
     model = User
     template_name = "account/user_detail.html"
     login_required = True
+
+@require_POST
+@login_required
+def delete_organizer_member(request, org_id):
+    user = request.user
+    org = get_object_or_404(Organizer, pk=org_id)
+    
+    if org.owner == user :
+        raise ValidationError(
+            message="レース主催団体のオーナーはメンバーから削除できません。"
+        )
+    else :
+        org.members.remove(user)
+
+    return redirect( f'/account/{ user.pk }/detail' )
