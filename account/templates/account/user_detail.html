@@ -29,21 +29,38 @@
                 <tr>
                     <th>団体名</th>
                     <th>直近のレース</th>
-                    <th>その他</th>
+                    <th>ロール</th>
+                    <th>アクション</th>
                 </tr>
-                {% for org in object.organizer_set.all %}
+                {% for org in object.organizers.all %}
                 <tr>
                     <td>{{ org.name }}</td>
                     <td></td>
                     <td>
+                        {% if org.owner == object %}
+                            <p class="text-primary">オーナー</p>
+                        {% else %}
+                            <p class="text-secondary">メンバー</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if org.owner == object %}
+                        <button type="button" class="btn btn-info" href="#">
+                            情報更新
+                        </button>
+                        {% else %}
+                        <button type="button" class="btn btn-info" href="#">
+                            情報表示
+                        </button>
                         <button type="button" class="btn btn-danger" data-name="{{ org.name }}" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
                             削除
                         </button>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </table>
-            {% if not object.organizer_set.all %}
+            {% if not object.organizers.all %}
             <p class="display-4 m-3">所属主催団体なし</p> 
             {% endif %}
         </div>
