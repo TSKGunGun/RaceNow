@@ -44,8 +44,6 @@
                     </div>
                 </div>
             </div>
-
-   
             <table class="table">
                 <tr>
                     <th>団体名</th>
@@ -66,16 +64,18 @@
                     </td>
                     <td>
                         {% if org.owner == object %}
-                        <button type="button" class="btn btn-info" href="#">
+                        <a role="button" class="btn btn-info" href="#">
                             情報更新
-                        </button>
+                        </a>
                         {% else %}
-                        <button type="button" class="btn btn-info" href="#">
+                        <a role="button" class="btn btn-info" href="#">
                             情報表示
-                        </button>
-                        <button type="button" class="btn btn-danger" data-name="{{ org.name }}" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
-                            削除
-                        </button>
+                        </a>
+                        <form style="display:inline;" action="{% url 'delete_org_member' %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="organizer" value="{{ org.id }}">
+                            <button type="submit" class="btn btn-danger my-2">削除</button>    
+                        </form>
                         {% endif %}
                     </td>
                 </tr>

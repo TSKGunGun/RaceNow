@@ -27,9 +27,10 @@ class UserDetailView(DetailView):
 
 @require_POST
 @login_required
-def delete_organizer_member(request, org_id):
-    user = request.user
+def delete_organizer_member(request):
+    org_id = request.POST['organizer']
     org = get_object_or_404(Organizer, pk=org_id)
+    user = request.user
     
     if org.owner == user :
         raise ValidationError(

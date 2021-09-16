@@ -247,12 +247,12 @@ class Account_Detail_Test(TestCase):
         self.assertEqual(self.org.members.count(), 2)
         
         with self.assertRaises(ValidationError):
-            self.client.post( f'/account/deleteOrgMember/{self.org.id}')        
+            self.client.post( '/account/deleteOrgMember', data={'organizer': self.org.id})        
 
         self.client.logout()
         self.client.force_login(self.testuser2)
         
-        response = self.client.post( f'/account/deleteOrgMember/{self.org.id}')
+        response = self.client.post( '/account/deleteOrgMember', data={'organizer': self.org.id})
         self.assertEqual(self.org.members.count(), 1)
         self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")
         
@@ -266,16 +266,16 @@ class Account_Detail_Test(TestCase):
         
         self.client.logout()
         self.client.force_login(self.testuser2)
-        response = self.client.post( f'/account/addOrgMember',{'organizer':org2.id})
+        response = self.client.post( '/account/addOrgMember',{'organizer':org2.id})
         self.assertEqual(org2.members.count(), 2)
         self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")
 
-        response = self.client.post( f'/account/addOrgMember', {'organizer':org2.id})
+        response = self.client.post( '/account/addOrgMember', {'organizer':org2.id})
         self.assertEqual(org2.members.count(), 2)
         self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")          
         
         self.client.logout()
         self.client.force_login(self.testuser1)
-        response = self.client.post( f'/account/addOrgMember', {'organizer':org2.id})
+        response = self.client.post( '/account/addOrgMember', {'organizer':org2.id})
         self.assertEqual(org2.members.count(), 2)
         self.assertRedirects(response, f"/account/{self.testuser1.pk}/detail")          
