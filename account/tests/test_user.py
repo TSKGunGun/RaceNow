@@ -266,16 +266,16 @@ class Account_Detail_Test(TestCase):
         
         self.client.logout()
         self.client.force_login(self.testuser2)
-        response = self.client.post( f'/account/addOrgMember/{org2.id}')
+        response = self.client.post( f'/account/addOrgMember',{'organizer':org2.id})
         self.assertEqual(org2.members.count(), 2)
         self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")
 
-        response = self.client.post( f'/account/addOrgMember/{org2.id}')
+        response = self.client.post( f'/account/addOrgMember', {'organizer':org2.id})
         self.assertEqual(org2.members.count(), 2)
         self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")          
         
         self.client.logout()
         self.client.force_login(self.testuser1)
-        response = self.client.post( f'/account/addOrgMember/{org2.id}')
+        response = self.client.post( f'/account/addOrgMember', {'organizer':org2.id})
         self.assertEqual(org2.members.count(), 2)
         self.assertRedirects(response, f"/account/{self.testuser1.pk}/detail")          

@@ -9,3 +9,10 @@ class CustomUserCreationForm(UserCreationForm):
         field_classes = {'username': UsernameField}
     
 
+class AddOrganizerForm(forms.Form):
+    def __init__(self, user, *args, **kwargs ) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields['organizer'] = forms.ChoiceField(
+            choices=[ (org.id, org.name ) for org in Organizer.objects.exclude(members__in=[user])],
+        )
+    
