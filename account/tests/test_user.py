@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from account.models import Organizer, User, CustomUsernameValidator
 from account.forms import CustomUserCreationForm
-from account.views import CreateUserView, delete_organizer_member
+from account.views import CreateUserView
 
 # Create your tests here.
 class UserModel_Create_Test(TestCase):
@@ -256,5 +256,26 @@ class Account_Detail_Test(TestCase):
         self.assertEqual(self.org.members.count(), 1)
         self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")
         
-    def test_delete_organizer_notlogin(self):
+    def test_add_organizer_notlogin(self):
+        org2 = Organizer.objects.create(
+            owner = self.testuser1,
+            name="org2",
+            email_address = "test@example.com"
+        )
+        org2.members.add(self.testuser1)
+        
         self.client.logout()
+        self.client.force_login(self.testuser2)
+        response = self.client.post( f'/account/addOrgMember/{org2.id}')
+        self.assertEqual(org2.members.count(), 2)
+        self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")
+
+        response = self.client.post( f'/account/addOrgMember/{org2.id}')
+        self.assertEqual(org2.members.count(), 2)
+        self.assertRedirects(response, f"/account/{self.testuser2.pk}/detail")          
+        
+        self.client.logout()
+        self.client.force_login(self.testuser1)
+        response = self.client.post( f'/account/addOrgMember/{org2.id}')
+        self.assertEqual(org2.members.count(), 2)
+        self.assertRedirects(response, f"/account/{self.testuser1.pk}/detail")          

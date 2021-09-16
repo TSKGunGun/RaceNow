@@ -13,5 +13,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('account/create', CreateUserView.as_view(), name='account_create'),
     path('account/<int:pk>/detail', UserDetailView.as_view() ,name='account_detail'),
-    path('account/deleteOrgMember/<int:org_id>', views.delete_organizer_member, name='delete_member' )
+    path('account/deleteOrgMember/<int:org_id>', views.delete_organizer_member, name='delete_member' ),
+    path('account/addOrgMember/<int:org_id>', views.add_organizer_member, name='add_member' )
 ]

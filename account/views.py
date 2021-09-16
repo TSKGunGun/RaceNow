@@ -33,3 +33,15 @@ def delete_organizer_member(request, org_id):
         org.members.remove(user)
 
     return redirect( f'/account/{ user.pk }/detail' )
+
+@require_POST
+@login_required
+def add_organizer_member(request, org_id):
+    user = request.user
+    org = get_object_or_404(Organizer, pk=org_id)
+
+    if (org.owner != user) and (org.members.filter(pk=user.id).count() == 0 ) :
+        org.members.add(user)
+        return redirect( f'/account/{ user.pk }/detail' )
+    else :
+        return redirect( f'/account/{ user.pk }/detail' )
