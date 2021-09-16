@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}レース主催団体新規作成{% endblock %}
+
+{% block contents %}
+<section class="container py-2">
+    <div class="row">
+        <p class="display-5 text-center">レース主催団体新規作成</p>
+    </div>
+    <div class="row justify-content-center">
+        <form action="{% url 'organizer_create' %}" method="POST">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            {% bootstrap_button type="submit" content="新規作成" %}
+        </form>
+    </div>
+</section>
+{% endblock %}

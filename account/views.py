@@ -1,11 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls.base import reverse
+from django.utils import translation
 from django.views.generic import CreateView, TemplateView, DetailView
-from .forms import CustomUserCreationForm, AddOrganizerForm
+from .forms import CustomUserCreationForm, AddOrganizerForm, CreateOrganizerForm
 from .models import Organizer, User
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 # Create your views here.
 class CreateUserView(CreateView):
@@ -54,3 +57,35 @@ def add_organizer_member(request):
         return redirect( f'/account/{ user.pk }/detail' )
     else :
         return redirect( f'/account/{ user.pk }/detail' )
+
+class CreateOrganizerView(CreateView):
+    model = Organizer
+    login_required = True
+    template_name = 'organizer/create.html'
+    form_class = CreateOrganizerForm
+
+    def post(self, request):
+        form = self.get_form()
+        org = Organizer(
+                owner = self.request.user,
+                name = request.POST['name'],
+                email_address = request.POST['email_address'],
+                url = request.POST['url']
+        )
+        self.object = org
+        if form.is_valid() :
+            with transaction.atomic() :
+                org.save()
+                org.members.add(self.request.user)
+
+            return redirect('organizer_detail', pk=org.id)
+        else:
+            return self.form_invalid(form)
+
+    def get_success_url(self) -> str:
+        return reverse('organizer_detail', kwargs={'pk':self.object.id})
+
+class OrganizerDetailView(DetailView):
+    model = Organizer
+    login_required = False
+    template_name = 'organizer/detail.html'

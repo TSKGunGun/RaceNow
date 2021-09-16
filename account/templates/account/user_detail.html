@@ -33,7 +33,7 @@
                     </h2>
                 <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
                     <div class="accordion-body">
-                        <a href="#" class="btn btn-primary me-2 my-3">新しいレース主催団体を作成</a>
+                        <a href="{% url 'organizer_create' %}" class="btn btn-primary me-2 my-3">新しいレース主催団体を作成</a>
                         <hr>
                         <p class="h4">既存のレース主催団体を追加</p>
                         <form action="{% url 'add_org_member' %}" method="POST">
@@ -63,12 +63,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if org.owner == object %}
-                        <a role="button" class="btn btn-info" href="#">
-                            情報更新
-                        </a>
-                        {% else %}
-                        <a role="button" class="btn btn-info" href="#">
+                        <a role="button" class="btn btn-info" href="{% url 'organizer_detail' pk=org.id %}">
                             情報表示
                         </a>
                         <form style="display:inline;" action="{% url 'delete_org_member' %}" method="POST">
@@ -76,7 +71,6 @@
                             <input type="hidden" name="organizer" value="{{ org.id }}">
                             <button type="submit" class="btn btn-danger my-2">削除</button>    
                         </form>
-                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

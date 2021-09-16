@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}{{ object.name }}{% endblock %}
+
+{% block contents %}
+<section class="container py-2">
+    <div class="row">
+        <div class="col">
+            <p class="display-5">{{ object.name }}</p>
+        </div>
+    </div>
+    
+    <div class="row my-2">
+        <div class="col">
+            <p class="h5 d-inline" >基本情報</p>
+            {% if user == object.owner %}
+                <a href="#" role="button" class="btn btn-primary ms-2">基本情報を更新する</a>
+            {% endif %}
+            <table class="table mt-2">
+                <tr>
+                    <th>メールアドレス</th>
+                    <td>{{ object.email_address }}</td>
+                </tr>
+                <tr>
+                    <th>ホームページURL</th>
+                    <td>{{ object.url }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="row my-5">
+        <div class="col">
+            <div>
+                <p class="h5">所属メンバー</p>
+            </div>
+            <table class="table">
+                <tr>
+                    <th>ユーザ名</th>
+                    <th>ロール</th>
+                    <th>アクション</th>
+                </tr>
+                {% for member in object.members.all %}
+                <tr>
+                    <td>{{ member.username }}</td>
+                    <td>
+                        {% if member == object.owner %}
+                        <p class="text-primary">オーナー</p>
+                        {% else %}
+                        <p class="text-secondary">メンバー</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user == object.owner %}
+                        <form style="display:inline;" action="#" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="organizer" value="{{ member.id }}">
+                            <button type="submit" class="btn btn-danger my-2">削除</button>    
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
