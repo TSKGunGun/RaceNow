@@ -141,7 +141,6 @@ class Race_CreateView_Test(TestCase):
     def test_postpage_create(self):
         params = {
             "name":"test_race",
-            "organizer" : self.org.id,
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
@@ -156,6 +155,3 @@ class Race_CreateView_Test(TestCase):
         
         self.assertTrue(Race.objects.exists())
         self.assertEqual(response.status_code, 302)
-
-    def test_postpage_invalid(self):
-        pass

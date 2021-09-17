@@ -1,53 +1,48 @@
 from django.core.exceptions import PermissionDenied
-from django.http import request
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import TemplateView
-from django.views.generic.detail import DetailView
-from .models import Category, Race, RaceStatus, RaceType
+from django.views.generic import TemplateView, CreateView, DetailView
+from .models import Race, RaceType
 from place.models import Place
 from account.models import Organizer
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from .forms import CreateRaceForm
+from django.urls import reverse
 
 # Create your views here.
-def race_validation(race):
-        return True
-
 @method_decorator(login_required, name='dispatch')
-class CreateRaceView(TemplateView):
-    def get(self, request, org_id):
-        org = get_object_or_404(Organizer, pk=org_id)
+class CreateRaceView(CreateView):
+    template_name = "race/create.html"
+    form_class = CreateRaceForm
+    
+    def get(self, request, *args, **kwargs):
+        org = get_object_or_404(Organizer, pk=kwargs["org_id"])
 
         if not org.members.filter(id=request.user.id).exists() : 
             raise PermissionDenied
             
-        context = {
-            "organizer" : org,
-            "places" : Place.objects.filter(is_active=True),
-            "categories" : Category.objects.all(),
-            "racetypes" : RaceType.objects.all(),
-        }
-        return render(request, "race/create.html", context=context)
+        return super().get(request, *args, **kwargs)
     
-    def post(self, request, org_id):
-        org = get_object_or_404(Organizer, pk=request.POST['organizer'])
+    def post(self, request, *args, **kwargs):
+        self.object=None
+        org = get_object_or_404(Organizer, pk=kwargs['org_id'])
 
         if not org.members.filter(id=request.user.id).exists() : 
             raise PermissionDenied
 
-        race = Race(
-            organizer = org,
-            place = get_object_or_404(Place, pk=request.POST["place"]),
-            name = request.POST["name"],
-            racetype = get_object_or_404(RaceType, pk=request.POST["racetype"]),
-            url = request.POST["url"],
-        )
-
-        if not race_validation(race) :
-            pass
-
-        race.save()
-        return redirect("race_detail", pk=race.id)
+        form = self.get_form()
+        if form.is_valid():
+            race = Race(
+                organizer = org,
+                place = get_object_or_404(Place, pk=request.POST["place"]),
+                name = request.POST["name"],
+                url = request.POST["url"],
+                racetype = get_object_or_404(RaceType, pk=request.POST["racetype"]),
+            )   
+            race.save()
+            return redirect("race_detail", race.id)
+        
+        return self.form_invalid(form)
 
 class RaceDetailView(DetailView):
     model = Race
