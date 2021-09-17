@@ -2,6 +2,7 @@ from typing import get_type_hints
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from .views import CreateUserView, UserDetailView, CreateOrganizerView, OrganizerDetailView
+from race.views import CreateRaceView
 from . import views
 
 urlpatterns = [
@@ -17,4 +18,5 @@ urlpatterns = [
     path('account/addOrgMember', views.add_organizer_member, name='add_org_member' ),
     path('organizer/create', CreateOrganizerView.as_view(), name='organizer_create'),
     path('organizer/<int:pk>/detail', OrganizerDetailView.as_view(), name='organizer_detail' ),
+    path('organizer/<int:org_id>/createrace', CreateRaceView.as_view(), name='race_create' ),
 ]

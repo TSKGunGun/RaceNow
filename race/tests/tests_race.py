@@ -1,3 +1,4 @@
+from django.http import response
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from account.models import Organizer
@@ -40,3 +41,61 @@ class Race_Model_Test(TestCase):
         )
 
         self.assertEqual(Race.objects.count(), 1)
+
+class Race_CreateView_Test(TestCase):
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.create_user(
+            username = "test_user",
+            password = "password"
+        )
+
+        self.org = Organizer.objects.create(
+            owner = self.user,
+            name = "test_organizer",
+            email_address = "test@example.com"
+        )
+
+        self.place = Place.objects.create(
+            owner = self.user,
+            name = "test_place",
+            address = "test_place_address"
+        )
+
+    def test_getpage_notlogin(self):
+        self.client.logout()
+        response = self.client.get(f'/organizer/{self.org.id}/createrace')
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_getpage_loginend_notmember(self):
+        user2 = get_user_model().objects.create_user(
+            username = "username",
+            password = "password"
+        )
+        org2 = Organizer.objects.create(
+            owner = user2,
+            name = "test_org2",
+            email_address = "test@example.com"
+        )
+        org2.members.add(user2)
+        
+        self.client.logout()
+        self.client.force_login(self.user)
+        response = self.client.get(f'/organizer/{org2.id}/createrace')
+
+        self.assertEqual(response.status_code, 403)
+    
+    def test_getpage_loginend_member(self):
+        user2 = get_user_model().objects.create_user(
+            username = "username",
+            password = "password"
+        )
+        
+        self.client.logout()
+        self.client.force_login(user2)
+        response = self.client.get(f'/organizer/{self.org.id}/createrace')
+        self.assertEqual(response.status_code, 403)
+
+        self.org.members.add(user2)
+        response = self.client.get(f'/organizer/{self.org.id}/createrace')
+        self.assertEqual(response.status_code, 200)
