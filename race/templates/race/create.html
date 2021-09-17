@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}新規レース作成{% endblock %}
+
+{% block contents %}
+<section class="container py-2">
+    <div class="row">
+        <div class="col">
+            <p class="display-5 text-center">新規レース作成</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <form action="{% url 'place_create' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="org_id" value="{{ organizer.id }}">
+                <div class="mb-3">
+                    <label class="form-label" for="id_name">レース名</label>
+                    <input type="text" name="name" maxlength="50" class="form-control" placeholder="レース名" required id="id_name">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label" for="place">開催場所</label>
+                    <select name="place" class="form-select" id="place">
+                        <option value="-1">---</option>
+                        {% for place in places %}
+                        <option value="{{ place.id }}">{{ place.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="category">レースカテゴリ</label>
+                    <select name="category" class="form-select" id="category">
+                        <option value="-1">---</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="racetype">レースタイプ</label>
+                    <select name="racetype" disabled="true" class="form-select" id="racetype">
+                        <option value="-1">---</option>
+                        {% for racetype in racetypes %}
+                        <option value="{{ racetype.id }}" data-parent="{{ racetype.category.id }}">{{racetype.name}}</option>
+                        {% endfor %}    
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label" for="url">Url</label>
+                    <input type="url" name="url" class="form-control" placeholder="ホームページURLを入力" id="url">
+                </div>
+                <button class="btn btn-primary" type="submit">作成</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block script %}
+<script>
+    var category = document.querySelector('#category');
+    var racetype = document.querySelector('#racetype');
+    var original = racetype.innerHTML;
+
+    category.onchange = event => {
+        var category_id = category.selectedOptions[0].value;
+        racetype.innerHTML = original;
+        racetype.querySelectorAll('option').forEach(function(element){
+            if ( element.value == -1 ) { return; }
+            
+            var parent_id = element.getAttribute('data-parent');
+            if ( category_id != parent_id ) {
+                element.remove()
+            }
+        })
+
+        if ( category_id == -1 ) {
+            racetype.setAttribute('disabled', 'true');
+        } else {
+            racetype.removeAttribute('disabled');
+        }
+    }
+</script>
+{% endblock %}
