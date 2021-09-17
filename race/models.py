@@ -33,9 +33,9 @@ class Race(models.Model):
     organizer = models.ForeignKey(Organizer, verbose_name="主催者", null=False, on_delete=models.CASCADE)
     place = models.ForeignKey(Place, verbose_name="開催地", null=False, on_delete=models.CASCADE )
     name = models.CharField(verbose_name="レース名", null=False, max_length=50)
-    
+    url = models.URLField(verbose_name="ホームページURL", null=True, blank=True)    
     racetype = models.ForeignKey(RaceType, verbose_name="レースタイプ", null=False, on_delete=models.CASCADE)
-    #status = models.ForeignKey(RaceStatus, verbose_name="ステータス", null=False, default=)
+    status = models.ForeignKey(RaceStatus, verbose_name="ステータス", null=False, default=1, on_delete=models.CASCADE)
 
     created_at = models.DateField(verbose_name="作成日", auto_now_add=True)
     updated_at = models.DateField(verbose_name="更新日", auto_now=True)
