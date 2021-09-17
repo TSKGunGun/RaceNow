@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}レース主催場所_新規作成{% endblock %}
+
+{% block contents %}
+<section class="container py-2">
+    <div class="row py-5">
+        <div class="col">
+            <p class="display-5">{{ object.name }}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p class="h5">基本情報</p>
+            {% if IsMember == True %}
+            <a role="button" class="btn btn-primary" href="#">基本情報更新</a>
+            {% endif %}
+            <table class="table">
+                <tr>
+                    <th>開催場所</th>
+                    <td>{{ object.place.name }}</td>
+                </tr>
+                <tr>
+                    <th>ホームページURL</th>
+                    <td>{{ object.url }}</td>
+                </tr>
+            </table>   
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,6 +1,7 @@
+from race.models import Race
 from django.urls import path
-from .views import CreateRaceView
+from .views import RaceDetailView
 
 urlpatterns=[
-    path('<int:org_id>/detail', CreateRaceView.as_view(), name="race_detail")
+    path('<int:pk>/detail', RaceDetailView.as_view(), name="race_detail")
 ]
