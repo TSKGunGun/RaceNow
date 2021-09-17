@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import Race, RaceStatus, Category, RaceType
+from race.models import Race, RaceStatus, Category, RaceType
 
 # Create your tests here.
 class Custom_TestCase(TestCase):
