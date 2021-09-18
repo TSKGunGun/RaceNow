@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}レース一覧{% endblock %}
+
+{% block contents %}
+<table class="table">
+    <tr>
+        <th>レース名</th>
+        <th>開催日</th>
+        <th>主催団体</th>
+        <th>開催地</th>
+        <th></th>
+    </tr>
+    {% for race in race_list %}
+    <tr>
+        <td>{{ race.name }}</td>
+        <td>{{ race.date }}</td>
+        <td>{{ race.organizer.name }}</td>
+        <td>{{ race.place.name }}</td>
+        <td>
+            <a role="button" class="btn btn-primary" href="{% url 'race_detail' race.id %}">詳細を見る</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

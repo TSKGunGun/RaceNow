@@ -1,6 +1,7 @@
+from django.views import generic
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import TemplateView, CreateView, DetailView
+from django.views.generic import CreateView, DetailView, ListView
 from .models import Race, RaceType
 from place.models import Place
 from account.models import Organizer
@@ -53,3 +54,7 @@ class RaceDetailView(DetailView):
         context["IsMember"] =  self.object.organizer.members.filter(id=self.request.user.id).exists()
 
         return context
+
+class RaceIndexView(ListView):
+    model = Race
+    template_name = "race/list.html"
