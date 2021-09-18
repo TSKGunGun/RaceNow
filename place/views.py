@@ -2,7 +2,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.urls.base import reverse
-from django.views.generic import CreateView,DetailView
+from django.views.generic import CreateView,DetailView,ListView
 from .forms import CreatePlaceForm
 from .models import Place
 
@@ -34,3 +34,6 @@ class CreatePlaceView(CreateView):
 class PlaceDetailView(DetailView):
     model = Place
     template_name = "place/detail.html"
+
+class PlaceIndexView(ListView):
+    model = Place

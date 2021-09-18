@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}レース開催地一覧{% endblock %}
+
+{% block contents %}
+<table class="table">
+    <tr>
+        <th>場所名</th>
+        <th>住所</th>
+        <th></th>
+    </tr>
+    {% for place in place_list %}
+    <tr>
+        <td>{{ place.name }}</td>
+        <td>{{ place.address }}</td>
+        <td>
+            <a role="button" class="btn btn-primary" href="{% url 'place_detail' place.id %}">詳細を見る</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
