@@ -14,5 +14,33 @@
         </div>
     </div>
 </section>
-
+<section class="container my-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="bg-danger text-light text-center">
+                新着レース
+            </div>
+            {% for race in new_arrivals %}
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <h5 class="card-title d-inline">{{ race.name }}</h5>
+                        <p class="text-primary ms-2 d-inline">開催日:{{ race.date }} </p>
+                    </div>
+                    <p class="card-text">レースカテゴリ:{{ race.racetype.category.name }}:{{ race.racetype.name }} </p>
+                    <p>comment</p>
+                    <div class="text-end">
+                        <a role="button" class="btn btn-primary" href="{% url 'race_detail' pk=race.id %}">詳細を見る</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not new_arrivals %}
+            <div class="text-dark d-flex align-items-center justify-content-center" style="height: 50px; background-color: #D3D3D3;">
+                新着レースはありません
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
 {% endblock %}
