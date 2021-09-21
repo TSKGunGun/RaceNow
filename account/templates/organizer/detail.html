@@ -68,7 +68,9 @@
 <div class="container my-5">
     <h5>主催レース</h5>
     <small>※上位５件までを表示</small>
-    
+    <div>
+        <a href="{% url 'race_create' org_id=object.id %}" role="button" class="btn btn-primary">新規レース作成</a>
+    </div>
     {% if races %}
     {% for race in races %}
         {% include 'race_info_card.html' %}
