@@ -45,9 +45,9 @@
         <form class="form p-4" method="POST" action="{% url 'login' %}">
             {% csrf_token %}
             {{ form.username | add_label_class:"visually-hidden" }}
-            {{ form.username | attr:"placeholder: ユーザー名" | add_class:"form-control" }}
+            {% render_field form.username placeholder=form.username.label class+="form-control" %}
             {{ form.password | add_label_class:"visually-hidden" }}
-            {{ form.password | attr:"placeholder: パスワード" | add_class:"form-control" }}
+            {% render_field form.password placeholder=form.password.label class+="form-control" %}
             <input type="submit" value="ログイン" class="btn btn-primary mt-3 w-100">
         </form>
     </div>
