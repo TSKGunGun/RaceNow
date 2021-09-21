@@ -1,4 +1,3 @@
-from django.views import generic
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView
@@ -40,6 +39,7 @@ class CreateRaceView(CreateView):
                 url = request.POST["url"],
                 racetype = get_object_or_404(RaceType, pk=request.POST["racetype"]),
                 event_date = request.POST["event_date"],
+                note = request.POST['note'],
             )   
             race.save()
             return redirect("race_detail", race.id)

@@ -4,7 +4,7 @@
 {% block title %}レース主催場所_新規作成{% endblock %}
 
 {% block contents %}
-<section class="container py-2">
+<div class="container py-2">
     <div class="row mb-5">
         <div class="col">
             <p class="display-5 d-inline">{{ object.name }}</p>
@@ -21,6 +21,10 @@
                 <tr>
                     <th>開催場所</th>
                     <td>{{ object.place.name }}</td>
+                </tr>
+                <tr>
+                    <th>開催日</th>
+                    <td>{{ object.event_date }}</td>
                 </tr>
                 <tr>
                     <th>主催団体</th>
@@ -53,6 +57,19 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col">
+            <p class="h5">その他掲載情報</p>
+            {% if object.note %}
+                {{ object.note }}
+            {% else %}
+                <div class="p-3 border  border-4 rounded h5 text-center bg-noneinfo" >
+                    記載なし
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
     {% if IsMember == True %}
     <hr>
     <div class="row my-5">
@@ -81,5 +98,5 @@
             </table>
         </div>
     </div>
-</section>
+</div>
 {% endblock %}

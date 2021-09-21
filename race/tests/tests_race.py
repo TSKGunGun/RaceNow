@@ -112,7 +112,8 @@ class Race_CreateView_Test(TestCase):
             "place" : 1,
             "category" : 1,
             "racetype" : 1,
-            "url" : ""
+            "url" : "",
+            "note" : ""
         }
         
         self.client.logout()
@@ -125,7 +126,8 @@ class Race_CreateView_Test(TestCase):
             "place" : 1,
             "category" : 1,
             "racetype" : 1,
-            "url" : ""
+            "url" : "",
+            "note" : ""
         }
         
         user2 = get_user_model().objects.create_user(
@@ -150,7 +152,8 @@ class Race_CreateView_Test(TestCase):
             "category" : 1,
             "racetype" : 1,
             "event_date" : timezone.now().strftime("%Y-%m-%d"),
-            "url" : ""
+            "url" : "",
+            "note" : ""
         }
         self.org.members.add(self.user)
         self.client.logout()
@@ -169,7 +172,8 @@ class Race_CreateView_Test(TestCase):
             "category" : 1,
             "racetype" : 1,
             "event_date" : "",
-            "url" : ""
+            "url" : "",
+            "note" : ""
         }
         self.org.members.add(self.user)
         self.client.logout()
@@ -188,7 +192,8 @@ class Race_CreateView_Test(TestCase):
             "category" : 1,
             "racetype" : 1,
             "event_date" : (timezone.now()-timedelta(days=1)).strftime("%Y-%m-%d"),
-            "url" : ""
+            "url" : "",
+            "note" : ""
         }
         self.org.members.add(self.user)
         self.client.logout()
@@ -205,7 +210,8 @@ class Race_CreateView_Test(TestCase):
             "category" : 1,
             "racetype" : 1,
             "event_date" : (timezone.now()+timedelta(days=1)).strftime("%Y-%m-%d"),
-            "url" : ""
+            "url" : "",
+            "note" : ""
         }
         self.org.members.add(self.user)
         self.client.logout()
@@ -224,7 +230,8 @@ class Race_CreateView_Test(TestCase):
             "category" : 1,
             "racetype" : 1,
             "event_date" : (timezone.now()+timedelta(days=1)).strftime("%Y/%m/%d"),
-            "url" : ""
+            "url" : "",
+            "note" : ""
         }
         self.org.members.add(self.user)
         self.client.logout()
@@ -235,6 +242,26 @@ class Race_CreateView_Test(TestCase):
         
         self.assertFalse(Race.objects.exists())
         self.assertEqual(response.status_code, 200)
+
+    def test_craterace_notecheck(self):
+        params = {
+            "name":"test_race",
+            "place" : self.place.id,
+            "category" : 1,
+            "racetype" : 1,
+            "event_date" : timezone.now().strftime("%Y-%m-%d"),
+            "url" : "",
+            "note" : "SampleNote"
+        }
+        self.org.members.add(self.user)
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        self.assertFalse(Race.objects.exists())
+        response = self.client.post(f'/organizer/{self.org.id}/createrace', params)
+        self.assertTrue(Race.objects.exists())
+
+        self.assertEqual(Race.objects.first().note, "SampleNote" )
 
 class EventDateValidationTest(TestCase):
     def test_samedate(self):

@@ -44,6 +44,8 @@ class CreateRaceForm(forms.ModelForm):
 
     url = forms.URLField(label="ホームページURL", required=False)
 
+    note = forms.CharField(label="その他掲載情報", max_length=500, widget=forms.Textarea, required=False)
+
     def clean_place(self):
         place = self.cleaned_data['place']
         return int(place)
