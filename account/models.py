@@ -34,11 +34,11 @@ class User(AbstractUser):
 
 #organizer
 class Organizer(models.Model):
-    owner = models.ForeignKey(User, verbose_name="owner", related_name="owner", null=False, on_delete=models.CASCADE)
-    name = models.CharField(verbose_name="name", max_length=100, null=False)
-    email_address = models.EmailField(verbose_name="email_address", null=False)
-    is_active = models.BooleanField(verbose_name="is_active", default=True)
-    url = models.URLField(verbose_name="homepage_url", null=False)
+    owner = models.ForeignKey(User, verbose_name="オーナー", related_name="owner", null=False, on_delete=models.CASCADE)
+    name = models.CharField(verbose_name="主催団体名", max_length=100, null=False)
+    email_address = models.EmailField(verbose_name="メールアドレス", null=False)
+    is_active = models.BooleanField(verbose_name="有効フラグ", default=True)
+    url = models.URLField(verbose_name="ホームページURL", null=False)
     members = models.ManyToManyField(User, related_name="organizers", related_query_name="organizer")
 
     def __str__(self) -> str:
