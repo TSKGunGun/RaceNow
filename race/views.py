@@ -1,13 +1,13 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic.base import TemplateView
 from .models import Race, RaceType
 from place.models import Place
 from account.models import Organizer
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from .forms import CreateRaceForm
-from django.urls import reverse
+from .forms import CreateRaceForm, Regulation_XC_Form
 
 # Create your views here.
 @method_decorator(login_required, name='dispatch')
@@ -55,6 +55,26 @@ class RaceDetailView(DetailView):
         context["IsMember"] =  self.object.organizer.members.filter(id=self.request.user.id).exists()
 
         return context
+
+def get_regulation_form(racetype):
+    if racetype.id == 3 : #CrossCountry
+        return Regulation_XC_Form
+    else :
+        raise ValueError(
+            messages = f"未対応のRaceType { racetype.id }:{racetype.name}が検出されました。" 
+        )
+
+class RegulationSetupView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        race = get_object_or_404(Race,pk=kwargs["pk"])
+        template_name = "race/regulations_setup.html"
+        context = {
+            "race":race,
+            "form":get_regulation_form(race.racetype)
+        }
+        return render(request, template_name, context=context )
+
+
 
 class RaceIndexView(ListView):
     model = Race

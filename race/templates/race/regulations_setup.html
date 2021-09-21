@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block append_head %}
+{% endblock %}
+
+{% block title %}レギュレーション設定{% endblock %}
+
+{% block contents %}
+<div class="container py-2">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <p class="display-5">レギュレーション設定</p>
+            <p class="h5">レースタイプ:{{ race.racetype.name }}</p>
+            <form action="{% url 'regulations_setup' pk=race.id %}" method="POST">
+                {% csrf_token %}
+                <div class="bg-light border rounded p-3">
+                    <div class="h5 py-2">チームレース設定</div>
+                    {% render_field form.is_teamrace %}
+                    <div class="form-group" id="input_teamrace_setting" hidden >
+                        チーム最小人数
+                        {% render_field form.teammember_count_min %}
+                        チーム最大人数
+                        {% render_field form.teammember_count_max %}
+                    </div>
+                </div>
+                <div class="bg-light border rouded p-3 my-3">
+                    <div class="h5 py-2">ヒート設定</div>
+                    {% render_field form.is_heat %}
+                    <div class="form-group" id="input_heat_setting" hidden >
+                        ヒート数
+                        {% render_field form.heat_count %}
+                    </div>
+                </div>
+                <div class="text-end ">
+                    <input type="submit" value="レースレギュレーション決定" class="btn btn-primary">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    var is_teamrace = document.querySelector('#id_is_teamrace');
+    var input_teamrace = document.querySelector('#input_teamrace_setting')
+    is_teamrace.onchange = event => {
+        var ele_count_min = input_teamrace.querySelector('#id_teammember_count_min');
+        var ele_count_max = input_teamrace.querySelector('#id_teammember_count_max');
+
+        if( is_teamrace.selectedOptions[0].value == "True" ){
+            input_teamrace.removeAttribute('hidden');
+            ele_count_max.setAttribute('required', 'True');
+            ele_count_min.setAttribute('required', 'True');
+        } else {
+            input_teamrace.setAttribute('hidden', 'True');
+            ele_count_max.removeAttribute('required');
+            ele_count_min.removeAttribute('required');
+        }
+    }
+
+    var is_heat = document.querySelector('#id_is_heat');
+    var input_heat = document.querySelector('#input_heat_setting');
+    is_heat.onchange = event => {
+        var ele_heat_count = input_heat.querySelector('#id_heat_count')
+        
+        if( is_heat.selectedOptions[0].value == "True" ){
+            input_heat.removeAttribute('hidden');
+            ele_heat_count.setAttribute('required', 'True');
+        } else {
+            input_heat.setAttribute('hidden', 'True');
+            ele_heat_count.removeAttribute('required');
+        }
+    }
+</script>
+{% endblock %}

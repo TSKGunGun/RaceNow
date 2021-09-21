@@ -6,7 +6,6 @@ from .models import Category, Race, RaceType
 from place.models import Place
 from django.forms.widgets import Select
 
-
 class RaceTypeSelect(Select):
     def __init__(self, attrs=None, choices=(), queryset=None):
         self.queryset = queryset
@@ -61,3 +60,18 @@ class CreateRaceForm(forms.ModelForm):
     class Meta:
         model = Race
         fields = ("name",)
+
+class Regulation_XC_Form(forms.Form):
+    is_teamrace = forms.ChoiceField(label="チームレース", 
+                            choices=[(False, "いいえ"),(True, "はい") ],
+                            widget=forms.Select(attrs={"class":"form-select"}))
+    teammember_count_min = forms.IntegerField(label="チーム最小人数", required=False, 
+                            widget=forms.NumberInput(attrs={"class":"form-control"}))
+    teammember_count_max = forms.IntegerField(label="チーム最大人数", required=False,
+                            widget=forms.NumberInput(attrs={"class":"form-control"}))
+
+    is_heat = forms.ChoiceField(label="ヒート制", 
+                            choices=[(False, "いいえ"),(True, "はい") ],
+                            widget=forms.Select(attrs={"class":"form-select"}))
+    heat_count = forms.IntegerField(label="ヒート数", required=False, 
+                            widget=forms.NumberInput(attrs={"class":"form-control"}))
