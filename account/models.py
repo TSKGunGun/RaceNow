@@ -16,7 +16,7 @@ class CustomUsernameValidator(validators.RegexValidator):
 # Create your models here.
 class User(AbstractUser):
     username_validator = CustomUsernameValidator()
-    username = models.CharField("username", 
+    username = models.CharField("ユーザー名", 
                     max_length=50, 
                     null=False, 
                     unique=True, 
@@ -26,7 +26,7 @@ class User(AbstractUser):
                         'unique' : 'そのユーザー名は既に使われています。'
                     },
                 )
-    email = models.EmailField('email_address', null=False)
+    email = models.EmailField('メールアドレス', null=False)
     
     class Meta:
         db_table = 'users'
