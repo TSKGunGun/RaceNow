@@ -4,7 +4,7 @@
 {% block title %}{{ object.name }}{% endblock %}
 
 {% block contents %}
-<section class="container py-2">
+<div class="container py-2">
     <div class="row">
         <div class="col">
             <p class="display-5">{{ object.name }}</p>
@@ -64,5 +64,19 @@
             </table>
         </div>
     </div>
-</section>
+</div>
+<div class="container my-5">
+    <h5>主催レース</h5>
+    <small>※上位５件までを表示</small>
+    
+    {% if races %}
+    {% for race in races %}
+        {% include 'race_info_card.html' %}
+    {% endfor %}
+    {% else %}
+        <div class="p-3 border  border-4 rounded h5 text-center" style="background-color: #f5f5f5;"  >
+            登録された主催レースがありません。
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
