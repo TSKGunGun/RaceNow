@@ -7,8 +7,18 @@
 <div class="container py-2">
     <div class="row mb-5">
         <div class="col">
-            <p class="display-5 d-inline">{{ object.name }}</p>
-            <p class="bg-info p-2 h6 d-inline rounded-pill">{{ object.status.name }}</p>
+            <div class="display-5">
+                {{ object.name }}
+                {% if object.status.id == 1 %}
+                    <span class="badge bg-info p-2 rounded">{{ object.status.name }}</span>
+                {% elif object.status.id == 2 %}
+                    <span class="badge bg-warning p-2 rounded">{{ object.status.name }}</span>
+                {% elif object.status.id == 3 %}
+                    <span class="badge bg-success p-2 rounded">{{ object.status.name }}</span>
+                {% elif object.status.id == 4 %}
+                    <span class="badge bg-secondary p-2 rounded">{{ object.status.name }}</span>
+                {% endif %}
+            </div>
         </div>
     </div>
     <div class="row">
