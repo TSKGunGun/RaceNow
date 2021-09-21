@@ -36,6 +36,7 @@ class Race(models.Model):
     url = models.URLField(verbose_name="ホームページURL", null=True, blank=True)    
     racetype = models.ForeignKey(RaceType, verbose_name="レースタイプ", null=False, on_delete=models.CASCADE)
     status = models.ForeignKey(RaceStatus, verbose_name="ステータス", null=False, default=1, on_delete=models.CASCADE)
+    event_date = models.DateField("開催日", null=False)
 
     created_at = models.DateField(verbose_name="作成日", auto_now_add=True)
     updated_at = models.DateField(verbose_name="更新日", auto_now=True)

@@ -39,6 +39,7 @@ class CreateRaceView(CreateView):
                 name = request.POST["name"],
                 url = request.POST["url"],
                 racetype = get_object_or_404(RaceType, pk=request.POST["racetype"]),
+                event_date = request.POST["event_date"],
             )   
             race.save()
             return redirect("race_detail", race.id)

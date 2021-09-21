@@ -1,7 +1,20 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load django_bootstrap5 %}
 
 {% block title %}新規レース作成{% endblock %}
+
+{% block append_head %}
+    <!-- for admin widgets -->
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}"/>
+
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    {{ form.media }}
+    <script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/admin/RelatedObjectLookups.js' %}"></script>
+    <!-- end for admin widgets -->
+{% endblock %}
 
 {% block contents %}
 <section class="container py-2">

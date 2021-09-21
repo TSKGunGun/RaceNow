@@ -1,8 +1,12 @@
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from account.models import Organizer
 from place.models import Place
 from race.models import Race, RaceStatus, RaceType
+from race.forms import EventDateValidator
 
 class Race_Model_Test(TestCase):
     fixtures = ['race_default.json', 'race_status_default.json']
@@ -36,6 +40,7 @@ class Race_Model_Test(TestCase):
             place = self.place,
             name = "test_race",
             racetype = rtype,
+            event_date = timezone.now(),
             url = ""
         )
 
@@ -144,6 +149,7 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
+            "event_date" : timezone.now().strftime("%Y-%m-%d"),
             "url" : ""
         }
         self.org.members.add(self.user)
@@ -155,3 +161,92 @@ class Race_CreateView_Test(TestCase):
         
         self.assertTrue(Race.objects.exists())
         self.assertEqual(response.status_code, 302)
+
+    def test_validation_date_notinput(self):
+        params = {
+            "name":"test_race",
+            "place" : self.place.id,
+            "category" : 1,
+            "racetype" : 1,
+            "event_date" : "",
+            "url" : ""
+        }
+        self.org.members.add(self.user)
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        self.assertFalse(Race.objects.exists())
+        response = self.client.post(f'/organizer/{self.org.id}/createrace', params)
+        
+        self.assertFalse(Race.objects.exists())
+        self.assertEqual(response.status_code, 200)
+    
+    def test_validation_eventdate_befordate(self):
+        params = {
+            "name":"test_race",
+            "place" : self.place.id,
+            "category" : 1,
+            "racetype" : 1,
+            "event_date" : (timezone.now()-timedelta(days=1)).strftime("%Y-%m-%d"),
+            "url" : ""
+        }
+        self.org.members.add(self.user)
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        self.assertFalse(Race.objects.exists())
+        response = self.client.post(f'/organizer/{self.org.id}/createrace', params)
+        self.assertFalse(Race.objects.exists())
+    
+    def test_validation_eventdate_afterdate(self):
+        params = {
+            "name":"test_race",
+            "place" : self.place.id,
+            "category" : 1,
+            "racetype" : 1,
+            "event_date" : (timezone.now()+timedelta(days=1)).strftime("%Y-%m-%d"),
+            "url" : ""
+        }
+        self.org.members.add(self.user)
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        self.assertFalse(Race.objects.exists())
+        response = self.client.post(f'/organizer/{self.org.id}/createrace', params)
+        
+        self.assertTrue(Race.objects.exists())
+        self.assertEqual(response.status_code, 302)
+
+    def test_validation_eventdate_badformat(self):
+        params = {
+            "name":"test_race",
+            "place" : self.place.id,
+            "category" : 1,
+            "racetype" : 1,
+            "event_date" : (timezone.now()+timedelta(days=1)).strftime("%Y/%m/%d"),
+            "url" : ""
+        }
+        self.org.members.add(self.user)
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        self.assertFalse(Race.objects.exists())
+        response = self.client.post(f'/organizer/{self.org.id}/createrace', params)
+        
+        self.assertFalse(Race.objects.exists())
+        self.assertEqual(response.status_code, 200)
+
+class EventDateValidationTest(TestCase):
+    def test_samedate(self):
+        testdate = timezone.now().today().date()
+        EventDateValidator(testdate)
+
+    def test_beforedate(self):
+        testdate = (timezone.now()-timedelta(days=1)).date()
+
+        with self.assertRaises(ValidationError, msg="開催日に過去の日付は設定できません。"):
+            EventDateValidator(testdate)
+
+    def test_afterdate(self):
+        testdate = (timezone.now() + timedelta(days=1)).date()
+        EventDateValidator(testdate)

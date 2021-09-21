@@ -1,4 +1,7 @@
 from django import forms
+from django.contrib.admin.widgets import AdminDateWidget
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 from .models import Category, Race, RaceType
 from place.models import Place
 from django.forms.widgets import Select
@@ -17,11 +20,19 @@ class RaceTypeSelect(Select):
             option['attrs'].update({'parent_id' : racetype.category.id})
         return option
 
+def EventDateValidator(value):
+    if timezone.now().today().date() > value:
+        raise ValidationError(
+            message="開催日に過去の日付は設定できません。"
+        )
+
 class CreateRaceForm(forms.ModelForm):
     place = forms.ChoiceField(label="レース開催地",
         choices= lambda: [(-1, '---' )] + [( item.id, item.name) for item in Place.objects.all()]
     )
     
+    event_date = forms.DateField(label="開催日", widget=AdminDateWidget(), validators=[EventDateValidator],)
+
     category = forms.ChoiceField(label="レースカテゴリ",
         choices= lambda: [(-1, '---' )] + [( item.id, item.name) for item in Category.objects.all()]
     )
@@ -48,4 +59,3 @@ class CreateRaceForm(forms.ModelForm):
     class Meta:
         model = Race
         fields = ("name",)
-
