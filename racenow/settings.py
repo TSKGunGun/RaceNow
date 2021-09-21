@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'race.apps.RaceConfig',
     'place.apps.PlaceConfig',
     'django_bootstrap5',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
