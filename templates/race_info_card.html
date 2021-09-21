@@ -2,7 +2,7 @@
     <div class="card-body">
         <div class="mb-2">
             <h5 class="card-title d-inline">{{ race.name }}</h5>
-            <p class="text-primary ms-2 d-inline">開催日:{{ race.date }} </p>
+            <p class="text-primary ms-2 d-inline">開催日:{{ race.event_date }} </p>
         </div>
         <p class="card-text">レースカテゴリ:{{ race.racetype.category.name }}:{{ race.racetype.name }} </p>
         開催地:<a href="{% url 'place_detail' pk=race.place.id %}">{{ race.place.name }}</a>
