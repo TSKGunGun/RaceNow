@@ -26,6 +26,9 @@ class RaceType(models.Model):
 class RaceStatus(models.Model):
     name = models.CharField(verbose_name="ステータス",  null=False, max_length=10)
 
+    def __str__(self) -> str:
+        return self.name
+
     class Meta:
         db_table = "racestatus"
 
@@ -42,3 +45,5 @@ class Race(models.Model):
     created_at = models.DateField(verbose_name="作成日", auto_now_add=True)
     updated_at = models.DateField(verbose_name="更新日", auto_now=True)
 
+    def __str__(self):
+        return f"{self.id} : {self.organizer.name } / {self.name}"

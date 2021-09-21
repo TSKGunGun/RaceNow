@@ -12,5 +12,8 @@ class Place(models.Model):
     url = models.URLField(verbose_name="homepage_url", null=True, blank=True)
     is_active = models.BooleanField(verbose_name="active", null=False, default=True)
 
+    def __str__(self) -> str:
+        return f"{self.id}:{self.name}"
+
     class Meta:
         db_table = "place"
