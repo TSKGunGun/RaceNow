@@ -58,12 +58,33 @@
     <div class="row my-3">
         <div class="col">
             <p class="h5">レースレギュレーション</p>
+            {% if race.regulations%}
             <table class="table">
+                
                 <tr>
                     <th>項目名</th>
                     <th>レギュレーション内容</th>
                 </tr>
+                {% for value in regulations.values %}
+                    <tr>
+                        {% for v in value.values %}
+                            {% if v == True %}
+                                <td>はい</td>
+                            {% elif v == False %}
+                                <td>いいえ</td>
+                            {% else %}
+                                <td>{{ v }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
             </table>
+            {% else %}
+                <div class="p-3 border  border-4 rounded text-center bg-noneinfo" >
+                    <p class="h5">未設定</p>
+                    <a role="button" class="btn btn-primary" href="{% url 'regulations_setup' pk=race.id %}">レギュレーションの設定</a>
+                </div>
+            {% endif %}
         </div>
     </div>
 

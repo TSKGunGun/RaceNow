@@ -1,3 +1,5 @@
+from json.decoder import JSONDecoder
+from django.core.checks import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView
@@ -6,8 +8,10 @@ from .models import Race, RaceType
 from place.models import Place
 from account.models import Organizer
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.utils.decorators import method_decorator
 from .forms import CreateRaceForm, Regulation_XC_Form
+import json
 
 # Create your views here.
 @method_decorator(login_required, name='dispatch')
@@ -53,7 +57,9 @@ class RaceDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["IsMember"] =  self.object.organizer.members.filter(id=self.request.user.id).exists()
-
+        
+        decoder = json.JSONDecoder()
+        context["regulations"] = decoder.decode(self.object.regulations)
         return context
 
 def get_regulation_form(racetype):
@@ -64,18 +70,53 @@ def get_regulation_form(racetype):
             messages = f"未対応のRaceType { racetype.id }:{racetype.name}が検出されました。" 
         )
 
+def get_regulation_template(racetype):
+    if racetype.id == 3 : #CrossCountry
+        return "race/regulations_setup_xc.html"
+    else :
+        raise ValueError(
+            messages = f"未対応のRaceType { racetype.id }:{racetype.name}が検出されました。" 
+        )
+
+
 class RegulationSetupView(TemplateView):
     def get(self, request, *args, **kwargs):
         race = get_object_or_404(Race,pk=kwargs["pk"])
-        template_name = "race/regulations_setup.html"
+        template_name = get_regulation_template(race.racetype)
         context = {
-            "race":race,
-            "form":get_regulation_form(race.racetype)
-        }
+                "race":race,
+                "form":get_regulation_form(race.racetype)
+            }       
+
         return render(request, template_name, context=context )
 
+    def post(self, request, *args, **kwargs):
+        race = get_object_or_404(Race,pk=kwargs["pk"])
+        form = get_regulation_form(race.racetype)
+        form = form(request.POST)
+        
+        if form.is_valid():
+            jsondata = {}
 
+            for field in form.fields:
+                jsondata[field] = { "field_visible_name": form.fields[field].label,
+                                    "value" : form.cleaned_data.get(field)
+                                }
+            
+            race.regulations = json.dumps(jsondata)
+            race.save()
+            return redirect("race_detail", race.id)
+        else:
+            for err in form.errors["__all__"]:
+                messages.warning(request, err)
 
+            context = {
+                "race":race,
+                "form":form
+            }                
+            template_name = get_regulation_template(race.racetype)
+            return render(request, template_name, context=context )
+    
 class RaceIndexView(ListView):
     model = Race
     template_name = "race/list.html"

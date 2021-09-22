@@ -11,6 +11,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <p class="display-5">レギュレーション設定</p>
+            <p class="h5">レース名:{{ race.name }}</p>
             <p class="h5">レースタイプ:{{ race.racetype.name }}</p>
             <form action="{% url 'regulations_setup' pk=race.id %}" method="POST">
                 {% csrf_token %}
@@ -43,9 +44,8 @@
 
 {% block script %}
 <script>
-    var is_teamrace = document.querySelector('#id_is_teamrace');
-    var input_teamrace = document.querySelector('#input_teamrace_setting')
-    is_teamrace.onchange = event => {
+    
+    function changeTeammemberInput(event) {
         var ele_count_min = input_teamrace.querySelector('#id_teammember_count_min');
         var ele_count_max = input_teamrace.querySelector('#id_teammember_count_max');
 
@@ -59,10 +59,7 @@
             ele_count_min.removeAttribute('required');
         }
     }
-
-    var is_heat = document.querySelector('#id_is_heat');
-    var input_heat = document.querySelector('#input_heat_setting');
-    is_heat.onchange = event => {
+    function changeHeatInput(event){
         var ele_heat_count = input_heat.querySelector('#id_heat_count')
         
         if( is_heat.selectedOptions[0].value == "True" ){
@@ -73,5 +70,18 @@
             ele_heat_count.removeAttribute('required');
         }
     }
+
+    var is_teamrace = document.querySelector('#id_is_teamrace');
+    var input_teamrace = document.querySelector('#input_teamrace_setting')
+    is_teamrace.addEventListener("change", changeTeammemberInput, false );
+    window.addEventListener("load",  changeTeammemberInput, false );
+
+    var is_heat = document.querySelector('#id_is_heat');
+    var input_heat = document.querySelector('#input_heat_setting');
+    is_heat.addEventListener("change", changeHeatInput, false );
+    input_heat.addEventListener("load",  changeHeatInput, false );
+
+
+
 </script>
 {% endblock %}

@@ -65,13 +65,64 @@ class Regulation_XC_Form(forms.Form):
     is_teamrace = forms.ChoiceField(label="チームレース", 
                             choices=[(False, "いいえ"),(True, "はい") ],
                             widget=forms.Select(attrs={"class":"form-select"}))
-    teammember_count_min = forms.IntegerField(label="チーム最小人数", required=False, 
+    teammember_count_min = forms.IntegerField(label="チーム最小人数", min_value=1, required=False, 
                             widget=forms.NumberInput(attrs={"class":"form-control"}))
-    teammember_count_max = forms.IntegerField(label="チーム最大人数", required=False,
+    teammember_count_max = forms.IntegerField(label="チーム最大人数", min_value=1, required=False,
                             widget=forms.NumberInput(attrs={"class":"form-control"}))
 
     is_heat = forms.ChoiceField(label="ヒート制", 
                             choices=[(False, "いいえ"),(True, "はい") ],
                             widget=forms.Select(attrs={"class":"form-select"}))
-    heat_count = forms.IntegerField(label="ヒート数", required=False, 
+    heat_count = forms.IntegerField(label="ヒート数", min_value=1, max_value=3, required=False, 
                             widget=forms.NumberInput(attrs={"class":"form-control"}))
+
+    def clean_is_teamrace(self):
+        select = self.cleaned_data["is_teamrace"]
+        if select == "True" :
+            return True
+        else :
+            return False 
+    def clean_teammember_count_min(self):
+        num = self.cleaned_data["teammember_count_min"]
+
+        if num == None or num == 0 or num == "" :
+            return 1
+        else :
+            return int(num)
+    
+    def clean_teammember_count_max(self):
+        num = self.cleaned_data["teammember_count_max"]
+
+        if num == None or num == 0 or num == "" :
+            return 1
+        else :
+            return int(num)
+    
+    def clean_heat_count(self):
+        num = self.cleaned_data["heat_count"]
+
+        if num == None or num == 0 or num == "" :
+            return 1
+        else :
+            return int(num)
+    
+    def clean_is_heat(self):
+        select = self.cleaned_data["is_heat"]
+        if select == "True" :
+            return True
+        else : 
+            return False
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        param = cleaned_data.get("is_teamrace")
+        print( f"is_teamrace:{ param } ")
+
+        if cleaned_data.get("is_teamrace") : 
+            if cleaned_data.get("teammember_count_min") > cleaned_data.get("teammember_count_max") :
+                raise ValidationError(
+                    message="チームメンバーの最小人数が最大人数より多くなっています。"
+                )
+        return cleaned_data
+            
