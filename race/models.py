@@ -40,7 +40,16 @@ class Race(models.Model):
     status = models.ForeignKey(RaceStatus, verbose_name="ステータス", null=False, default=1, on_delete=models.CASCADE)
     event_date = models.DateField("開催日", null=False)
     note = models.TextField(verbose_name="その他情報", null=True, blank=True, max_length=500 )
-    regulations = models.JSONField(verbose_name="レギュレーション", null=True, blank=True)
+    
+    #Regulation
+    is_regulationsetuped = models.BooleanField(default=False )
+
+    is_teamrace = models.BooleanField(verbose_name="チームレース", default=False )
+    team_member_count_min = models.IntegerField(verbose_name="チーム最小人数", default=0)
+    team_member_count_max = models.IntegerField(verbose_name="チームメンバー最大人数", default=0)
+
+    is_heat = models.BooleanField(verbose_name="ヒート制", default=False)
+    heat_count = models.IntegerField(verbose_name="ヒート数", default=0)
 
     created_at = models.DateField(verbose_name="作成日", auto_now_add=True)
     updated_at = models.DateField(verbose_name="更新日", auto_now=True)

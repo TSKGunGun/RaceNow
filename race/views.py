@@ -58,8 +58,6 @@ class RaceDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["IsMember"] =  self.object.organizer.members.filter(id=self.request.user.id).exists()
         
-        decoder = json.JSONDecoder()
-        context["regulations"] = decoder.decode(self.object.regulations)
         return context
 
 def get_regulation_form(racetype):
@@ -96,14 +94,22 @@ class RegulationSetupView(TemplateView):
         form = form(request.POST)
         
         if form.is_valid():
-            jsondata = {}
-
-            for field in form.fields:
-                jsondata[field] = { "field_visible_name": form.fields[field].label,
-                                    "value" : form.cleaned_data.get(field)
-                                }
+            race.is_regulationsetuped = True
+            race.is_teamrace = form.cleaned_data.get("is_teamrace")
             
-            race.regulations = json.dumps(jsondata)
+            if race.is_teamrace :
+                race.team_member_count_max = form.cleaned_data.get("team_member_count_max")
+                race.team_member_count_min = form.cleaned_data.get("team_member_count_min")
+            else :
+                race.team_member_count_max = 1
+                race.team_member_count_min = 1
+            
+            race.is_heat =form.cleaned_data.get("is_heat")
+            if race.is_heat :
+                race.heat_count = form.cleaned_data.get("heat_count")
+            else :
+                race.heat_count = 1
+
             race.save()
             return redirect("race_detail", race.id)
         else:

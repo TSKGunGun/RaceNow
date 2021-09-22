@@ -58,26 +58,42 @@
     <div class="row my-3">
         <div class="col">
             <p class="h5">レースレギュレーション</p>
-            {% if race.regulations%}
+            {% if race.is_regulationsetuped %}
             <table class="table">
-                
                 <tr>
                     <th>項目名</th>
                     <th>レギュレーション内容</th>
                 </tr>
-                {% for value in regulations.values %}
-                    <tr>
-                        {% for v in value.values %}
-                            {% if v == True %}
-                                <td>はい</td>
-                            {% elif v == False %}
-                                <td>いいえ</td>
-                            {% else %}
-                                <td>{{ v }}</td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
+                {% if race.is_teamrace %}
+                <tr>
+                    <td>レース形式</td>
+                    <td>チームレース</td>
+                </tr>
+                <tr>
+                    <td>チーム最小人数</td>
+                    <td>{{ race.team_member_count_min }}</td>
+                </tr>
+                <tr>
+                    <td>チーム最大人数</td>
+                    <td>{{ race.team_member_count_max }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td>レース形式</td>
+                    <td>個人レース</td>
+                </tr>
+                {% endif %}
+                {% if race.is_heat %}
+                <tr>
+                    <td>ヒート制</td>
+                    <td>あり {{ race.heat_count }}ヒート</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td>ヒート制</td>
+                    <td>なし(1ヒート)</td>
+                </tr>
+                {% endif %}
             </table>
             {% else %}
                 <div class="p-3 border  border-4 rounded text-center bg-noneinfo" >
