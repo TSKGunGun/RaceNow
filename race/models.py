@@ -1,5 +1,3 @@
-from operator import truediv
-from typing import ChainMap
 from django.db import models
 from account.models import Organizer
 from place.models import Place
