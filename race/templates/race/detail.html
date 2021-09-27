@@ -122,7 +122,9 @@
     <div class="row my-5">
         <div class="col">
             <p class="h5">レース管理</p>
-            <a role="button" class="btn btn-primary" href="#">参加者追加</a>
+            {% if object.is_regulationsetuped %}
+                <a role="button" class="btn btn-primary" href="{% url 'add_entrant' object.id %}">参加者追加</a>
+            {% endif %}
             <a role="button" class="btn btn-primary" href="#">リザルト入力</a>
         </div>
     </div>
@@ -137,12 +139,40 @@
     <div class="row">
         <div class="col">
             <p class="h5">参加者一覧</p>
-            <table>
+            {% if object.entrant_set.all %}
+            <table class="table">
                 <tr>
                     <th>ゼッケンNo</th>
                     <th>エントラント名</th>
+                    <th>メンバー氏名</th>
                 </tr>
+                {% for entrant in object.entrant_set.all %}
+                <tr>
+                    <td>{{ entrant.num }}</td>
+                    {% if entrant.team_name %}
+                        <td>{{ entrant.team_name }}</td>
+                    {% else %}
+                        <td>
+                            <span class="text-muted">チーム名なし</span>
+                        </td>
+                    {% endif %}
+                    <td>
+                        {% for member in entrant.entrant_member_set.all %}
+                            {{ member.name }} /
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
             </table>
+            {% elif not is_regulationsetuped %}
+            <div class="p-3 border  border-4 rounded h5 text-center bg-noneinfo" >
+                エントラントの登録にはレギュレーションの設定が必要です。
+            </div>
+            {% else %}
+            <div class="p-3 border  border-4 rounded h5 text-center bg-noneinfo" >
+                エントラント未登録
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
