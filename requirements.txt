@@ -2,3 +2,5 @@ django==3.2.6
 mysqlclient
 django_bootstrap5
 django-widget-tweaks
+factory_boy
+Faker

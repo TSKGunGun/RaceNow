@@ -66,6 +66,9 @@ class Race(models.Model):
 
     def __str__(self):
         return f"{self.id} : {self.organizer.name } / {self.name}"
+    
+    class Meta:
+        db_table = "race"
 
 class NumValidator(RegexValidator):
     regex = r'^[0-9]+\Z'
@@ -90,6 +93,5 @@ class Entrant_Member(models.Model):
     name = models.CharField(verbose_name="エントリー名", null=False, max_length=50)
 
 class Lap(models.Model):
-    race = models.ForeignKey(Race, verbose_name="レース", null=False, on_delete=models.CASCADE)
     entrant = models.ForeignKey(Entrant, verbose_name="エントラント", null=False, on_delete=models.CASCADE)
     laptime = models.TimeField(verbose_name="ラップタイム", null=True)

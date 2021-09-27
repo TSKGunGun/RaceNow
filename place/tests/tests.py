@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import Place
-from .forms import CreatePlaceForm
+from place.models import Place
+from place.forms import CreatePlaceForm
 
 
 # Create your tests here.
