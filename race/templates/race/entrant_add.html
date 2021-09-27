@@ -102,6 +102,24 @@
         }
     })
 
+    window.addEventListener('load', function(event){
+        var ele_input_members = document.querySelector('#id_members');
+        if ( ele_input_members.value != "") { 
+            memberdata = JSON.parse(ele_input_members.value); 
+
+            var targettable = document.querySelector('#members_info');
+            Object.values(memberdata).map(
+                val => {
+                    var addrow = targettable.insertRow();
+                    addrow.insertCell().appendChild(document.createTextNode(val["name"]));
+                    addrow.insertCell().appendChild(document.createTextNode(""));
+                }
+            )
+            
+            if(!(canAddMember())){btn_showModal.disabled = true;}
+        }
+    })
+
     function canAddMember(){
         var targettable = document.querySelector('#members_info');
         var count = targettable.rows.length - 1;
