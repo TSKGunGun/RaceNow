@@ -3,7 +3,7 @@ from race.models import Race, RaceStatus, Category, RaceType
 
 # Create your tests here.
 class Custom_TestCase(TestCase):
-   fixtures = ['race_default.json', 'race_status_default']
+  fixtures = ['race_default.json']
 
 class CategoryTest(Custom_TestCase):
     def test_defaultItems(self):

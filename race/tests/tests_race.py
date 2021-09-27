@@ -9,7 +9,7 @@ from race.models import Race, RaceStatus, RaceType
 from race.forms import EventDateValidator
 
 class Race_Model_Test(TestCase):
-    fixtures = ['race_default.json', 'race_status_default.json']
+    fixtures = ['race_default.json']
     
     def setUp(self) -> None:
         self.user = get_user_model().objects.create_user(
@@ -47,7 +47,7 @@ class Race_Model_Test(TestCase):
         self.assertEqual(Race.objects.count(), 1)
 
 class Race_CreateView_Test(TestCase):
-    fixtures = ['race_default.json', 'race_status_default.json']
+    fixtures = ['race_default.json']
 
     def setUp(self) -> None:
         self.user = get_user_model().objects.create_user(
@@ -279,7 +279,7 @@ class EventDateValidationTest(TestCase):
         EventDateValidator(testdate)
 
 class Race_StartTest(TestCase):
-    fixtures = ['race_default.json', 'race_status_default.json']
+    fixtures = ['race_default.json']
 
     def setUp(self) -> None:
         self.user = get_user_model().objects.create_user(
