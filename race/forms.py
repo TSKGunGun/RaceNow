@@ -5,6 +5,7 @@ from django.utils import timezone
 from .models import Category, Race, RaceType, Entrant
 from place.models import Place
 from django.forms.widgets import Select
+import json
 
 class RaceTypeSelect(Select):
     def __init__(self, attrs=None, choices=(), queryset=None):
@@ -129,7 +130,37 @@ class Regulation_XC_Form(forms.Form):
 class AddEntrantForm(forms.ModelForm):
     num = forms.CharField(label="ゼッケンNo", max_length=10, required=True)
     members = forms.CharField(widget=forms.HiddenInput(), required=False)
-    
+
+    def clean_members(self):
+        membersjson = self.cleaned_data["members"]
+        if membersjson == "" :
+            raise ValidationError(
+                message="メンバーが1名も追加されていません。"
+            )
+
+        decoder = json.JSONDecoder()
+        try:
+            members = decoder.decode(membersjson)
+        except:
+            raise ValidationError(
+                message="メンバーデータが正常に取得できませんでした。"
+            )
+        
+        race = self.instance
+        members_count = len(members.keys())
+        if race.team_member_count_min > members_count :
+            raise ValidationError(
+                message="メンバーが最少人数を満たしていません。"
+            )
+
+        if members_count > race.team_member_count_max :
+            raise ValidationError(
+                message="メンバーが最大人数を超えています。"
+            )
+
+        return membersjson
+
+
     class Meta():
         model = Entrant
         fields = ('team_name', 'num')

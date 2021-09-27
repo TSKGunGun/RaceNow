@@ -141,14 +141,17 @@ class AddEntrantView(TemplateView):
     def post(self,request, *args, **kwargs) :
         race = get_object_or_404(Race, pk=kwargs['pk'])
 
-        form = AddEntrantForm(request.POST)
-        
+        form = AddEntrantForm(request.POST, instance=race)
         if form.is_valid() :
             decoder = json.JSONDecoder()
             members = decoder.decode(request.POST["members"])
-            if self.members_validation(race, members) :
-                return redirect('race_detail', race.id)
+
+            return redirect('race_detail', race.id)
         
+        #memberは関連Inputがないのでフラッシュメッセージで出力
+        for err in form.errors['members'] :
+            messages.error(request, err)
+
         content = {
             "member_max": race.team_member_count_max,
             "member_min": race.team_member_count_min,
@@ -157,7 +160,3 @@ class AddEntrantView(TemplateView):
         }
 
         return render(request, 'race/entrant_add.html', content)
-
-
-    def members_validation(race, members):
-        return False
