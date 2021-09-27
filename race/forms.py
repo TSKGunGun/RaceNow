@@ -127,7 +127,7 @@ class Regulation_XC_Form(forms.Form):
         return cleaned_data
             
 class AddEntrantForm(forms.ModelForm):
-    members = forms.HiddenInput()
+    members = forms.CharField(widget=forms.HiddenInput())
     
     class Meta():
         model = Entrant

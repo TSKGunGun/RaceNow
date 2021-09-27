@@ -31,7 +31,7 @@
         <div class="border border-1 rounded">
             <div class="bg-light p-1 border border-1 d-flex justify-content-between align-items-center">
                 <p class="h5 ms-1 my-auto">エントラントメンバー</p>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#MemberAddModal">メンバー追加</button>
+                <button type="button" class="btn btn-primary" id="btn_showmemberaddModal" data-bs-toggle="modal" data-bs-target="#MemberAddModal">メンバー追加</button>
             </div>
             <div class="card-body">
                 <table class="table" id="members_info">
@@ -49,7 +49,7 @@
 <div class="modal fade" id="MemberAddModal" tabindex="-1" aria-labelledby="MemberAddModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <Form>
+            <Form method="dialog">
                 <div class="modal-header">
                     <h5 class="modal-title" id="MemberAddModalLabel">メンバー追加</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -68,4 +68,33 @@
 {% endblock %}
 
 {% block script %}
+<script>
+    var frm_memberadd = new bootstrap.Modal(document.getElementById('MemberAddModal'));
+    var btn_showModal = document.querySelector("#btn_showmemberaddModal");
+    btn_showModal.addEventListener("click", function(event){
+
+    })
+
+    document.querySelector('#MemberAddModal').addEventListener("submit", function(event){
+        var membername = document.querySelector('#addmember_name').value;
+
+        var targettable = document.querySelector('#members_info');
+        var addrow = targettable.insertRow();
+        addrow.insertCell().appendChild(document.createTextNode(membername));
+        addrow.insertCell().appendChild(document.createTextNode(""));
+
+        var ele_input_members = document.querySelector('#id_members');
+        var memberdata = {};
+        if ( ele_input_members.value != "") { 
+            memberdata = JSON.parse(ele_input_members.value); 
+        }
+
+        memberdata[Object.keys(memberdata).length] = {"name":membername };
+        ele_input_members.value = JSON.stringify(memberdata);
+
+        document.querySelector('#addmember_name').value = "";
+
+        frm_memberadd.hide();
+    })
+</script>
 {% endblock %}
