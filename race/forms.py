@@ -125,9 +125,10 @@ class Regulation_XC_Form(forms.Form):
                     message="チームメンバーの最小人数が最大人数より多くなっています。"
                 )
         return cleaned_data
-            
+
 class AddEntrantForm(forms.ModelForm):
-    members = forms.CharField(widget=forms.HiddenInput())
+    num = forms.CharField(label="ゼッケンNo", max_length=10, required=True)
+    members = forms.CharField(widget=forms.HiddenInput(), required=False)
     
     class Meta():
         model = Entrant

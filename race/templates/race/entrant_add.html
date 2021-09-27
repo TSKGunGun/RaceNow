@@ -12,7 +12,7 @@
     <div class="row">
         <p class="display-5">エントラント追加</p>    
     </div>
-    <form action="{% url 'add_entrant' pk=object.id %}" >
+    <form action="{% url 'add_entrant' pk=object.id %}" method="POST" >
         <div class="d-flex justity-content-between ">
             <span class="h5 me-auto">レース名 {{ object.name }}</span>
             <div class="ms-auto">

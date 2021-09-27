@@ -1,6 +1,7 @@
 from django.db import models
 from account.models import Organizer
 from place.models import Place
+from django.core.validators import RegexValidator
 
 # Create your models here.
 class Category(models.Model):
@@ -57,10 +58,18 @@ class Race(models.Model):
     def __str__(self):
         return f"{self.id} : {self.organizer.name } / {self.name}"
 
+class NumValidator(RegexValidator):
+    regex = r'^[0-9]+\Z'
+    message = "ゼッケンNoは数字のみで入力してください。"
+
+
 class Entrant(models.Model):
     race = models.ForeignKey(Race, verbose_name="参加レース", null=False, on_delete=models.CASCADE)
     team_name = models.CharField(verbose_name="チーム名", max_length=60, null=True, blank=True)
-    num = models.CharField(verbose_name="ゼッケンNo", max_length=10, null=True, blank=True)
+
+    numValidator = NumValidator()
+    num = models.CharField(verbose_name="ゼッケンNo", max_length=10, null=False, blank=True, validators=[numValidator,])
+
     is_dns = models.BooleanField(verbose_name="DNS", default=False)
     is_dnf = models.BooleanField(verbose_name="DNF", default=False)
 

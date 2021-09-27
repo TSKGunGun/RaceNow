@@ -142,19 +142,21 @@ class AddEntrantView(TemplateView):
         race = get_object_or_404(Race, pk=kwargs['pk'])
 
         form = AddEntrantForm(request.POST)
-        decoder = json.JSONDecoder()
-        members = decoder.decode(form.members)
+        
+        if form.is_valid() :
+            decoder = json.JSONDecoder()
+            members = decoder.decode(request.POST["members"])
+            if self.members_validation(race, members) :
+                return redirect('race_detail', race.id)
+        
+        content = {
+            "member_max": race.team_member_count_max,
+            "member_min": race.team_member_count_min,
+            "form" : form,
+            "object" : race
+        }
 
-        if form.is_valid() and self.members_validation(race, members) :
-            pass
-        else:        
-            content = {
-                "member_max": race.team_member_count_max,
-                "member_min": race.team_member_count_min,
-                "form" : form
-            }
-
-            return render(request, 'race/entrant_add.html', content)
+        return render(request, 'race/entrant_add.html', content)
 
 
     def members_validation(race, members):
