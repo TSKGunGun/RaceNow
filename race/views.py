@@ -3,13 +3,14 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.base import TemplateView
-from .models import Race, RaceType
+from .models import Entrant, Entrant_Member, Race, RaceType
 from place.models import Place
 from account.models import Organizer
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm
+from django.db import transaction
 import json
 
 # Create your views here.
@@ -145,6 +146,21 @@ class AddEntrantView(TemplateView):
         if form.is_valid() :
             decoder = json.JSONDecoder()
             members = decoder.decode(request.POST["members"])
+
+            entrant = Entrant(
+                race = race,
+                team_name = form.cleaned_data.get("team_name"),
+                num = form.cleaned_data.get("num")
+            )
+
+            with transaction.atomic():
+                entrant.save()
+                for v in members.values():
+                    member = Entrant_Member.objects.create(
+                        belonging = entrant,
+                        name = v["name"]
+                    )
+
 
             return redirect('race_detail', race.id)
         
