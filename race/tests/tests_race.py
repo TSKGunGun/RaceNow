@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from account.models import Organizer
 from place.models import Place
 from race.models import Race, RaceStatus, RaceType
+import datetime
 from race.forms import EventDateValidator
 
 class Race_Model_Test(TestCase):
@@ -151,7 +152,7 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
-            "event_date" : timezone.now().strftime("%Y-%m-%d"),
+            "event_date" : datetime.date.today().strftime("%Y-%m-%d"),
             "url" : "",
             "note" : ""
         }
@@ -209,7 +210,7 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
-            "event_date" : (timezone.now()+timedelta(days=1)).strftime("%Y-%m-%d"),
+            "event_date" : (datetime.date.today()+timedelta(days=1)).strftime("%Y-%m-%d"),
             "url" : "",
             "note" : ""
         }
@@ -229,7 +230,7 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
-            "event_date" : (timezone.now()+timedelta(days=1)).strftime("%Y/%m/%d"),
+            "event_date" : (datetime.date.today()+timedelta(days=1)).strftime("%Y/%m/%d"),
             "url" : "",
             "note" : ""
         }
@@ -249,10 +250,11 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
-            "event_date" : timezone.now().strftime("%Y-%m-%d"),
+            "event_date" : datetime.date.today().strftime("%Y-%m-%d"),
             "url" : "",
             "note" : "SampleNote"
         }
+
         self.org.members.add(self.user)
         self.client.logout()
         self.client.force_login(self.user)
