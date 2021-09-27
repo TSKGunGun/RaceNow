@@ -1,4 +1,3 @@
-from json.decoder import JSONDecoder
 from django.core.checks import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,7 +9,7 @@ from account.models import Organizer
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
-from .forms import CreateRaceForm, Regulation_XC_Form
+from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm
 import json
 
 # Create your views here.
@@ -126,3 +125,37 @@ class RegulationSetupView(TemplateView):
 class RaceIndexView(ListView):
     model = Race
     template_name = "race/list.html"
+
+class AddEntrantView(TemplateView):
+    def get(self, request, *args, **kwargs) :
+        race = get_object_or_404(Race, pk=kwargs['pk'])
+        content = {
+            "member_max": race.team_member_count_max,
+            "member_min": race.team_member_count_min,
+            "form" : AddEntrantForm,
+            "object" : race
+        }
+
+        return render(request, 'race/entrant_add.html', content)
+
+    def post(self,request, *args, **kwargs) :
+        race = get_object_or_404(Race, pk=kwargs['pk'])
+
+        form = AddEntrantForm(request.POST)
+        decoder = json.JSONDecoder()
+        members = decoder.decode(form.members)
+
+        if form.is_valid() and self.members_validation(race, members) :
+            pass
+        else:        
+            content = {
+                "member_max": race.team_member_count_max,
+                "member_min": race.team_member_count_min,
+                "form" : form
+            }
+
+            return render(request, 'race/entrant_add.html', content)
+
+
+    def members_validation(race, members):
+        return False

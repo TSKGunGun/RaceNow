@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from .models import Category, Race, RaceType
+from .models import Category, Race, RaceType, Entrant
 from place.models import Place
 from django.forms.widgets import Select
 
@@ -126,3 +126,12 @@ class Regulation_XC_Form(forms.Form):
                 )
         return cleaned_data
             
+class AddEntrantForm(forms.ModelForm):
+    members = forms.HiddenInput()
+    
+    class Meta():
+        model = Entrant
+        fields = ('team_name', 'num')
+
+
+
