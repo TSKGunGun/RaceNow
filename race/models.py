@@ -24,6 +24,12 @@ class RaceType(models.Model):
         db_table = "racetype"
 
 class RaceStatus(models.Model):
+    RACE_STATUS_DEFAULT = 1
+    RACE_STATUS_HOLD = 2
+    RACE_STATUS_END = 3
+    RACE_STATUS_CANCEL = 4
+
+
     name = models.CharField(verbose_name="ステータス",  null=False, max_length=10)
 
     def __str__(self) -> str:
@@ -38,7 +44,7 @@ class Race(models.Model):
     name = models.CharField(verbose_name="レース名", null=False, max_length=50)
     url = models.URLField(verbose_name="ホームページURL", null=True, blank=True)    
     racetype = models.ForeignKey(RaceType, verbose_name="レースタイプ", null=False, on_delete=models.CASCADE)
-    status = models.ForeignKey(RaceStatus, verbose_name="ステータス", null=False, default=1, on_delete=models.CASCADE)
+    status = models.ForeignKey(RaceStatus, verbose_name="ステータス", null=False, default=RaceStatus.RACE_STATUS_DEFAULT, on_delete=models.CASCADE)
     event_date = models.DateField("開催日", null=False)
     note = models.TextField(verbose_name="その他情報", null=True, blank=True, max_length=500 )
     
@@ -54,6 +60,9 @@ class Race(models.Model):
 
     created_at = models.DateField(verbose_name="作成日", auto_now_add=True)
     updated_at = models.DateField(verbose_name="更新日", auto_now=True)
+
+    def is_member(self, user):
+        return self.organizer.is_member(user)
 
     def __str__(self):
         return f"{self.id} : {self.organizer.name } / {self.name}"

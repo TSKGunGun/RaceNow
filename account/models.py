@@ -41,6 +41,9 @@ class Organizer(models.Model):
     url = models.URLField(verbose_name="ホームページURL", null=False)
     members = models.ManyToManyField(User, related_name="organizers", related_query_name="organizer")
 
+    def is_member(self, user):
+        return self.members.filter(pk=user.id).exists()
+
     def __str__(self) -> str:
         return self.name
 

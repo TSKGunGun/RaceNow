@@ -3,7 +3,8 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.base import TemplateView
-from .models import Entrant, Entrant_Member, Race, RaceType
+from django.views.decorators.http import require_POST
+from .models import Entrant, Entrant_Member, Race, RaceStatus, RaceType
 from place.models import Place
 from account.models import Organizer
 from django.contrib.auth.decorators import login_required
@@ -57,6 +58,7 @@ class RaceDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["IsMember"] =  self.object.organizer.members.filter(id=self.request.user.id).exists()
+        context["Is_canstart"] = (self.object.status.id == RaceStatus.RACE_STATUS_DEFAULT)
         
         return context
 
@@ -176,3 +178,15 @@ class AddEntrantView(TemplateView):
         }
 
         return render(request, 'race/entrant_add.html', content)
+
+@require_POST
+@login_required
+def startRace(request, pk):
+    race = get_object_or_404(Race, pk=pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
+
+    race.status = RaceStatus.objects.get(pk=RaceStatus.RACE_STATUS_HOLD)
+    race.save()
+
+    return redirect('race_detail', race.id)
