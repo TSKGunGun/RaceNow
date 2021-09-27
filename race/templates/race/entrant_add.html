@@ -31,7 +31,7 @@
         <div class="border border-1 rounded">
             <div class="bg-light p-1 border border-1 d-flex justify-content-between align-items-center">
                 <p class="h5 ms-1 my-auto">エントラントメンバー</p>
-                <a role="button" class="btn btn-primary" href="http://">メンバー追加</a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#MemberAddModal">メンバー追加</button>
             </div>
             <div class="card-body">
                 <table class="table" id="members_info">
@@ -41,11 +41,30 @@
                     </tr>
                 </table>
             </div>
-        </div>
-        
+        </div>     
     </form>
 </div>
-    
+
+<!-- Modal -->
+<div class="modal fade" id="MemberAddModal" tabindex="-1" aria-labelledby="MemberAddModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <Form>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="MemberAddModalLabel">メンバー追加</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" name="addmember_name" id="addmember_name" placeholder="メンバー名" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="submit" class="btn btn-primary" id="btn_addmember_ok">追加</button>
+                </div>
+            </Form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block script %}
