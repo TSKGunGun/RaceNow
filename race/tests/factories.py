@@ -1,7 +1,7 @@
 import account
 import factory
 from factory import fuzzy
-from race.models import Race, Entrant, Entrant_Member, RaceType, Category
+from race.models import Race, Entrant, Entrant_Member, RaceType, Category, Lap
 import string
 from datetime import datetime, timedelta
 from account.tests.factories import OrganizerFactory
@@ -35,8 +35,8 @@ class RaceFactory(factory.django.DjangoModelFactory):
 class EntrantFactory(factory.django.DjangoModelFactory):
 
     race = factory.SubFactory(RaceFactory)
-    team_name = fuzzy.FuzzyText(length=20, chars=string.ascii_letters, prefix="team_")
-    num = fuzzy.FuzzyText(length=5, chars="0123456789")    
+    team_name = factory.sequence(lambda n : f"team_{n}")
+    num = factory.sequence(lambda n : f"{n}")    
 
     class Meta:
         model = Entrant
@@ -47,3 +47,10 @@ class Entrant_Member_Factory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Entrant_Member
+
+class Lap_Factory(factory.django.DjangoModelFactory):
+    entrant = factory.SubFactory(EntrantFactory)
+    laptime = datetime.now()
+
+    class Meta:
+        model = Lap

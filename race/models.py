@@ -1,7 +1,9 @@
 from django.db import models
+from django.db.models import Count, Max
 from account.models import Organizer
 from place.models import Place
 from django.core.validators import RegexValidator
+
 
 # Create your models here.
 class Category(models.Model):
@@ -38,6 +40,13 @@ class RaceStatus(models.Model):
     class Meta:
         db_table = "racestatus"
 
+class RaceObjectManager(models.Manager):
+    def get_result(self, raceid):
+        return Entrant.objects.filter(race__pk = raceid).annotate(
+            lapcount=Count('lap'),
+            lasttime=Max('lap__created_at')
+        ).order_by('-lapcount', 'lasttime')
+
 class Race(models.Model):
     organizer = models.ForeignKey(Organizer, verbose_name="主催者", null=False, on_delete=models.CASCADE)
     place = models.ForeignKey(Place, verbose_name="開催地", null=False, on_delete=models.CASCADE )
@@ -63,6 +72,9 @@ class Race(models.Model):
 
     def is_member(self, user):
         return self.organizer.is_member(user)
+
+    #manager
+    objects = RaceObjectManager()
 
     def __str__(self):
         return f"{self.id} : {self.organizer.name } / {self.name}"
@@ -95,3 +107,7 @@ class Entrant_Member(models.Model):
 class Lap(models.Model):
     entrant = models.ForeignKey(Entrant, verbose_name="エントラント", null=False, on_delete=models.CASCADE)
     laptime = models.TimeField(verbose_name="ラップタイム", null=True)
+    created_at = models.DateTimeField(verbose_name="ラップ計測時間", auto_now_add=True)
+
+    def __str__(self):
+        return f'Race:{self.entrant.race.name}  entrant_no:{self.entrant.num} : {self.created_at}'
