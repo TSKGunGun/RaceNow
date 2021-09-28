@@ -58,7 +58,7 @@ class Race(models.Model):
     note = models.TextField(verbose_name="その他情報", null=True, blank=True, max_length=500 )
     
     #Regulation
-    is_regulationsetuped = models.BooleanField(default=False )
+    is_regulationsetuped = models.BooleanField(default=False)
 
     is_teamrace = models.BooleanField(verbose_name="チームレース", default=False )
     team_member_count_min = models.IntegerField(verbose_name="チーム最小人数", default=0)
