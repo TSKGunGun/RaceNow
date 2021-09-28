@@ -150,20 +150,19 @@ class AddEntrantView(TemplateView):
             decoder = json.JSONDecoder()
             members = decoder.decode(request.POST["members"])
 
-            entrant = Entrant(
-                race = race,
-                team_name = form.cleaned_data.get("team_name"),
-                num = form.cleaned_data.get("num")
-            )
-
             with transaction.atomic():
+                entrant = Entrant(
+                    race = race,
+                    team_name = form.cleaned_data.get("team_name"),
+                    num = form.cleaned_data.get("num")
+                )
+                entrant.save()
+                
                 for v in members.values():
                     member = Entrant_Member.objects.create(
+                        belonging = entrant,
                         name = v["name"]
                     )
-                    entrant.members.add(member)
-
-                entrant.save()
 
             return redirect('race_detail', race.id)
         
