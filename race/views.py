@@ -1,9 +1,10 @@
+from decimal import Context
 from django.core.checks import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.base import TemplateView
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from .models import Entrant, Entrant_Member, Race, RaceStatus, RaceType
 from place.models import Place
 from account.models import Organizer
@@ -100,8 +101,8 @@ class RegulationSetupView(TemplateView):
             race.is_teamrace = form.cleaned_data.get("is_teamrace")
             
             if race.is_teamrace :
-                race.team_member_count_max = form.cleaned_data.get("team_member_count_max")
-                race.team_member_count_min = form.cleaned_data.get("team_member_count_min")
+                race.team_member_count_max = form.cleaned_data.get("teammember_count_max")
+                race.team_member_count_min = form.cleaned_data.get("teammember_count_min")
             else :
                 race.team_member_count_max = 1
                 race.team_member_count_min = 1
@@ -156,13 +157,13 @@ class AddEntrantView(TemplateView):
             )
 
             with transaction.atomic():
-                entrant.save()
                 for v in members.values():
                     member = Entrant_Member.objects.create(
-                        belonging = entrant,
                         name = v["name"]
                     )
+                    entrant.members.add(member)
 
+                entrant.save()
 
             return redirect('race_detail', race.id)
         
@@ -190,3 +191,27 @@ def startRace(request, pk):
     race.save()
 
     return redirect('race_detail', race.id)
+
+@require_GET
+def show_result(request, pk):
+    context = {
+        "object" : get_object_or_404(Race, pk=pk),
+        "result" : Race.objects.get_result(pk)
+    }
+
+    return render(request, "race/resultview.html", context)
+
+@require_GET
+@login_required
+def get_inputResult(request, pk):
+    race = get_object_or_404(Race, pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
+
+
+    
+
+def post_addLap(request, pk):
+    race = get_object_or_404(Race, pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
