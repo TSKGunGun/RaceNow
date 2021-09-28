@@ -7,15 +7,14 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-9">
-            <table class="table table-striped">
+            <table class="table table-striped table-hover">
                 <tr>
                     <th class="text-center">順位</th>
                     <th class="text-center">ゼッケンNo</th>
                     <th>チーム名</th>
                     <th>ライダー</th>
                     <th class="text-center">周回数</th>
-                    <th class="d-none d-md-block">最終計測時間<br>
-                        <small class="small">※手入力の場合数分ほど誤差があります</small>
+                    <th class>最終計測時間<br>
                     </th>
                 </tr>
                 {% for item in result %}
@@ -32,9 +31,9 @@
                             {{ member.name }} /
                         {% endfor %}
                     </td>
-                    <td class="text-center d-none d-md-block">{{ item.lapcount }}</td>
+                    <td class="text-center">{{ item.lapcount }}</td>
                     {% if item.lasttime %}
-                    <td>{{ item.lasttime }}</td>
+                    <td>{{ item.lasttime }}</tdclass=>
                     {% else %}
                     <td><span class="text-muted">---</span></td>
                     {% endif %}
