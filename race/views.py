@@ -192,22 +192,18 @@ def startRace(request, pk):
     return redirect('race_detail', race.id)
 
 @require_GET
-def show_result(request, pk):
-    context = {
-        "object" : get_object_or_404(Race, pk=pk),
-        "result" : Race.objects.get_result(pk)
-    }
-
-    return render(request, "race/resultview.html", context)
-
-@require_GET
 @login_required
-def get_inputResult(request, pk):
-    race = get_object_or_404(Race, pk)
+def inputResult(request, pk):
+    race = get_object_or_404(Race, pk=pk)
     if not race.is_member(request.user) :
         raise PermissionDenied
 
+    context = {
+        "object":race,
+        "result":Race.objects.get_result(race.id)
+    }
 
+    return render(request, "race/input_result.html", context)
     
 
 def post_addLap(request, pk):
