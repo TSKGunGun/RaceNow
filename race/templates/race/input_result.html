@@ -100,5 +100,36 @@
 {% endblock %}
 
 {% block script %}
+<script>
+    var activeRow = -1;
+    var select_entNum = -1;
+    var resultTable = document.querySelector("#result_data");
+    Array.from(resultTable.getElementsByTagName("tr")).forEach(element => {
+        element.addEventListener('click', function(event){
+            if(activeRow > 0){
+                resultTable.rows[activeRow].classList.remove("bg-info");
+            }
+            if(element.rowIndex == 0 ) {
+                activeRow = -1;
+                select_entNum = -1;
+            } else {
+                activeRow = element.rowIndex;
+                select_entNum = element.cells[2].innerText;
+                element.classList.add("bg-info");
+            }
+        })    
+    });
 
+    document.querySelector("#LapEntryModal").addEventListener('show.bs.modal', function(event){
+        if(select_entNum > 0) {
+            Array.from(document.querySelector('#id_num').getElementsByTagName('option')).forEach(element=>{
+                if( element.innerText == select_entNum ){
+                    element.selected = true;
+                }
+            }
+            )
+        }
+    })
+    
+</script>
 {% endblock %}
