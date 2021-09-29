@@ -1,3 +1,4 @@
+import json
 from time import timezone
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -200,3 +201,41 @@ class ResutInput_View_Test(TestCase):
         self.assertNotEqual(response.status_code, 405)
         self.assertFalse(Lap.objects.exists())
         self.assertFalse(Entrant.objects.get(pk=self.ent1.id).lap_set.exists())
+
+class GetEntrantInfo_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self) :
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+
+    @patch('django.utils.timezone.now', return_value=datetime(2021, 1, 1, 1, 1 ,1, tzinfo=timezone.utc))
+    def test_getinfo(self, _mock_now):
+        startdatetime = timezone.now()
+        ent1 = EntrantFactory(race=self.race)
+        m1 = Entrant_Member_Factory(belonging=ent1)
+        m2 = Entrant_Member_Factory(belonging=ent1)
+        m3 = Entrant_Member_Factory(belonging=ent1)
+
+        _mock_now.return_value = startdatetime + timedelta(minutes=10)
+        Lap_Factory(entrant=ent1)
+
+        _mock_now.return_value = startdatetime + timedelta(minutes=20, seconds=1)
+        Lap_Factory(entrant=ent1)
+
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        response = self.client.get(f"/race/entrants/{ent1.id}/getinfo")
+        data = json.loads(response.content)
+        self.assertEqual(data["team_name"], ent1.team_name)
+        self.assertEqual(len(data["member"]), 3)
+        self.assertEqual(data["member"][0], m1.name)
+        self.assertEqual(data["member"][1], m2.name)
+        self.assertEqual(data["member"][2], m3.name)
+        
+        laps = data["laps"]
+        self.assertEqual(len(laps.keys()), 2)
+        self.assertEqual(datetime.strptime(laps["1"]["input_time"], '%Y-%m-%dT%H:%M:%S%z'), startdatetime + timedelta(minutes=10))
+        self.assertEqual(datetime.strptime(laps["2"]["input_time"], '%Y-%m-%dT%H:%M:%S%z'), startdatetime + timedelta(minutes=20, seconds=1))

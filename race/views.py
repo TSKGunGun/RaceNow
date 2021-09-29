@@ -1,5 +1,6 @@
 from django.core.checks import messages
-from django.core.exceptions import PermissionDenied, BadRequest
+from django.core.exceptions import PermissionDenied
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.base import TemplateView
@@ -214,7 +215,7 @@ def addLap(request, pk):
             entrant = entrant
         )
         return redirect('input_result', pk=race.id)
-        
+
     return render(request, "race/input_result.html", get_context_resultinput(race.id))
     
 def get_context_resultinput(raceid):
@@ -235,3 +236,24 @@ def get_lap_entry_form(raceid, *args, **kwargs):
         nums.append({"id": entrant.id, "num":entrant.num})
 
     return LapEntryForm(entrants=nums, *args, **kwargs)
+
+@require_GET
+def get_entrant_info(request, *args, **kwargs):
+    entrant = get_object_or_404(Entrant, pk=kwargs["pk"])
+
+    data = {
+        "team_name" : entrant.team_name,
+        "member" : [ member.name for member in entrant.entrant_member_set.all() ],
+        "laps" : get_lap_info(entrant)
+    }
+
+    return JsonResponse(data)
+
+def get_lap_info(entrant):
+    laps = {}
+    count = 1
+    for lap in entrant.lap_set.all():
+        laps[str(count)] = { "input_time" : lap.created_at }
+        count += 1
+    
+    return laps
