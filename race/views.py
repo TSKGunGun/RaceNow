@@ -59,6 +59,7 @@ class RaceDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["IsMember"] =  self.object.organizer.members.filter(id=self.request.user.id).exists()
         context["Is_canstart"] = (self.object.status.id == RaceStatus.RACE_STATUS_DEFAULT)
+        context["Is_RaceHold"] = (self.object.status.id == RaceStatus.RACE_STATUS_HOLD)
         
         return context
 

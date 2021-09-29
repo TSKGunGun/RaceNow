@@ -132,8 +132,8 @@
                 </form>    
             
             {% endif %}
-            {% if object.is_racehold %}
-                <a role="button" class="btn btn-primary" href="#">リザルト入力</a>
+            {% if Is_RaceHold %}
+                <a role="button" class="btn btn-primary" href="{% url 'input_result' object.id %}">リザルト入力</a>
             {% endif %}
         </div>
     </div>
