@@ -92,21 +92,21 @@
                     <span class="card-header h5">エントラント情報</span>
                     <div class="card-body">
                         <table class="table">
-                            <tr>
+                            <tr id="entrant_info_team_name">
                                 <th>チーム名</th>
                                 <td></td>
                             </tr>
-                            <tr>
+                            <tr id="entrant_info_team_member">
                                 <th>メンバー</th>
-                                <td>
-
-                                </td>
+                                <td></td>
                             </tr>
                         </table>
 
-                        <table class="table">
-                            <th>周回数</th>
-                            <th>入力時間</th>
+                        <table class="table" id="entrant_laps">
+                            <tr>
+                                <th class="text-center">周回数</th>
+                                <th>入力時間</th>
+                            </tr>
                         </table>
                     </div>
                 </div>
@@ -126,6 +126,8 @@
     var activeRow = -1;
     var select_entId = -1;
     var resultTable = document.querySelector("#result_data");
+    var num_selector = document.querySelector('#id_num');
+
     Array.from(resultTable.getElementsByTagName("tr")).forEach(element => {
         element.addEventListener('click', function(event){
             if(activeRow > 0){
@@ -143,15 +145,64 @@
     });
 
     document.querySelector("#LapEntryModal").addEventListener('show.bs.modal', function(event){
+        clean_entrant_data();
         if(select_entId > 0) {
-            Array.from(document.querySelector('#id_num').getElementsByTagName('option')).forEach(element=>{
+            Array.from(num_selector.getElementsByTagName('option')).forEach(element=>{
                 if( element.value == select_entId ){
                     element.selected = true;
                 }
-            }
-            )
+            })
+            get_entrant_info(select_entId, set_entrant_data);
         }
     })
     
+    num_selector.addEventListener('change', function(event){
+        var entrant_id = num_selector.selectedOptions[0].value;
+        if ( entrant_id > 0 ) { 
+            get_entrant_info(entrant_id, set_entrant_data);
+        }
+    })
+
+    function set_entrant_data(ent_data){
+        document.querySelector('#entrant_info_team_name').cells[1].innerText = ent_data["team_name"];
+    
+        var members_str=""
+        ent_data["member"].forEach( ele =>{
+            members_str += (ele + " / ")
+        })
+        document.querySelector('#entrant_info_team_member').cells[1].innerText = members_str
+
+        var lapTable = document.querySelector('#entrant_laps');
+        while(lapTable.rows.length > 1){
+            lapTable.rows[lapTable.rows.length-1].remove();
+        }
+        Object.keys(ent_data["laps"]).forEach( key =>{
+            var addRow = lapTable.insertRow();
+            var lap = ent_data["laps"][key];
+            var countcell = addRow.insertCell()
+            countcell.classList.add("text-center")
+            countcell.appendChild(document.createTextNode(key));
+            addRow.insertCell().appendChild(document.createTextNode(lap["input_time"]));
+        })
+    }
+
+    function clean_entrant_data(){
+        num_selector.selectedIndex = 0;
+        document.querySelector('#entrant_info_team_name').cells[1].innerText = ""
+        document.querySelector('#entrant_info_team_member').cells[1].innerText = "";
+        var lapTable = document.querySelector('#entrant_laps');
+        while(lapTable.rows.length > 1){
+            lapTable.rows[lapTable.rows.length-1].remove();
+        } 
+    }
+
+    function get_entrant_info(entrant_id, callbackfunc){
+        var uri = '/race/entrants/' + entrant_id + '/getinfo';
+        fetch(uri)
+        .then( response => response.json() 
+        )
+        .then( data =>{callbackfunc(data);
+        }); 
+    }
 </script>
 {% endblock %}
