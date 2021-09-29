@@ -1,10 +1,11 @@
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ValidationError
+from django.db.models import fields
 from django.utils import timezone
-from .models import Category, Race, RaceType, Entrant
+from .models import Category, Lap, Race, RaceType, Entrant
 from place.models import Place
-from django.forms.widgets import Select
+from django.forms.widgets import Select, TextInput
 import json
 
 class RaceTypeSelect(Select):
@@ -166,4 +167,25 @@ class AddEntrantForm(forms.ModelForm):
         fields = ('team_name', 'num')
 
 
+class LapEntryForm(forms.ModelForm):
+    num = forms.ChoiceField(label="ゼッケンNo")
 
+    def __init__(self, entrants=None, *args, **kwargs) :
+        self.base_fields["num"].choices = [('-1', '---')] + [ (v, v) for v in entrants]
+        super().__init__(*args, **kwargs)
+
+    def clean_num(self):
+        race = self.instance
+        num = self.cleaned_data["num"]
+
+        if not( Race.objects.filter(pk=race.id).filter(entrant_set_in = [num]).exists() ):
+            raise ValidationError(
+                message="存在しないゼッケンNoです。"
+            )
+        
+        return num
+
+    class Meta:
+        model = Lap
+        fields = ("num",)
+    

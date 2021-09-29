@@ -1,4 +1,3 @@
-from decimal import Context
 from django.core.checks import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,7 +10,7 @@ from account.models import Organizer
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
-from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm
+from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapEntryForm
 from django.db import transaction
 import json
 
@@ -200,13 +199,24 @@ def inputResult(request, pk):
 
     context = {
         "object":race,
-        "result":Race.objects.get_result(race.id)
+        "result":Race.objects.get_result(race.id),
+        "lap_entry_form" : get_lap_entry_form(race.id)
     }
 
     return render(request, "race/input_result.html", context)
-    
 
-def post_addLap(request, pk):
+@require_POST
+@login_required
+def addLap(request, pk):
     race = get_object_or_404(Race, pk)
     if not race.is_member(request.user) :
         raise PermissionDenied
+
+def get_lap_entry_form(raceid):
+    race = get_object_or_404(Race, pk=raceid)
+
+    nums = []
+    for entrant in race.entrant_set.all():
+        nums.append(entrant.num)
+
+    return LapEntryForm(entrants=nums)

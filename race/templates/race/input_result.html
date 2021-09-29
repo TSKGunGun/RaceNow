@@ -7,8 +7,9 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-9">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover" id="result_data">
                 <tr>
+                    <th hidden>ID</th>
                     <th class="text-center">順位</th>
                     <th class="text-center">ゼッケンNo</th>
                     <th>チーム名</th>
@@ -19,6 +20,7 @@
                 </tr>
                 {% for item in result %}
                 <tr>
+                    <td hidden>{{ item.id }}</td>
                     <td class="text-center">
                         <span class="h4">
                             {{ forloop.counter }}
@@ -52,7 +54,7 @@
                             <i class="bi bi-clipboard-data"></i>
                             詳細表示
                         </button>    
-                        <button class="btn btn-outline-light w-75 m-2">
+                        <button type="button" class="btn btn-outline-light w-75 m-2" data-bs-toggle="modal" data-bs-target="#LapEntryModal" >
                             <i class="bi bi-speedometer2"></i>
                             ラップ追加
                         </button>   
@@ -74,4 +76,29 @@
         </div>
     </div>
 </div>
+<!--LapEntryModl -->
+<div class="modal fade" id="LapEntryModal" tabindex="-1" aria-labelledby="LapEntryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="#">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="LapEntryModalLabel">ラップ追加</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                {% csrf_token %}
+                {% bootstrap_form lap_entry_form %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">ラップ追加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
 {% endblock %}
