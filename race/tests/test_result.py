@@ -1,7 +1,9 @@
 from time import timezone
+from django.contrib.auth import get_user_model
 from django.test import TestCase
-from race.models import Race
+from race.models import Race, Lap, Entrant
 from .factories import RaceFactory, EntrantFactory, Entrant_Member_Factory, Lap_Factory
+from account.tests.factories import UserFactory, OrganizerFactory
 from datetime import datetime, timedelta
 from django.utils import timezone
 from unittest.mock import patch
@@ -144,3 +146,57 @@ class Race_Model_Test(TestCase):
     def print_result(result):
         for item in result:
             print(f"No:{item.num} Laps:{item.lapcount} LastTime:{item.lasttime}")
+
+class ResutInput_View_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+        self.ent1 = EntrantFactory(race=self.race)
+        self.ent2 = EntrantFactory(race=self.race)
+
+        self.user = get_user_model().objects.first()
+
+    @patch('django.utils.timezone.now', return_value=datetime(2021, 1, 1, 1, 1 ,1, tzinfo=timezone.utc))
+    def test_addlap_view_true(self, _mock_now):
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        params={
+            "num" : self.ent1.num
+        }
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertTrue(Lap.objects.exists())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Lap.objects.first().entrant.id, self.ent1.id)
+        self.assertEqual(Lap.objects.first().created_at, datetime(2021, 1, 1, 1, 1, 1, tzinfo=timezone.utc))
+
+    def test_addlap_view_notlogin(self):
+        self.client.logout()
+
+        params={
+            "num" : self.ent1.num
+        }
+
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertTrue(Entrant.objects.exists())
+        self.assertNotEqual(response.status_code, 200)
+        self.assertFalse(Lap.objects.exists())
+        self.assertFalse(Entrant.objects.get(pk=self.ent1.id).lap_set.exists())
+        
+    def test_addlap_view_notmember(self):
+        self.client.logout()
+        usr2 = UserFactory()
+        self.client.force_login(usr2)
+        
+        params={
+            "num" : self.ent1.num
+        }
+
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertTrue(Entrant.objects.exists())
+        self.assertNotEqual(response.status_code, 405)
+        self.assertFalse(Lap.objects.exists())
+        self.assertFalse(Entrant.objects.get(pk=self.ent1.id).lap_set.exists())

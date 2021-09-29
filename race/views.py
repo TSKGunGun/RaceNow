@@ -1,10 +1,10 @@
 from django.core.checks import messages
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, BadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.base import TemplateView
 from django.views.decorators.http import require_GET, require_POST
-from .models import Entrant, Entrant_Member, Race, RaceStatus, RaceType
+from .models import Entrant, Entrant_Member, Race, RaceStatus, RaceType,Lap
 from place.models import Place
 from account.models import Organizer
 from django.contrib.auth.decorators import login_required
@@ -197,26 +197,45 @@ def inputResult(request, pk):
     if not race.is_member(request.user) :
         raise PermissionDenied
 
+    return render(request, "race/input_result.html", get_context_resultinput(race.id))
+
+@require_POST
+@login_required
+def addLap(request, pk):
+    race = get_object_or_404(Race, pk=pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
+    
+    form = get_lap_entry_form(race.id, data=request.POST, instance=race)
+    if form.is_valid():
+        result = Entrant.objects.filter(race=race).filter(num=request.POST["num"])
+        if result.count() == 1 :
+            entrant = get_object_or_404(Entrant, pk=result[0].id)
+            Lap.objects.create(
+                entrant = entrant
+            )
+            return redirect('input_result', pk=race.id)
+
+        else:
+            raise BadRequest
+
+    return render(request, "race/input_result.html", get_context_resultinput(race.id))
+    
+def get_context_resultinput(raceid):
+    race = get_object_or_404(Race, pk=raceid)
     context = {
         "object":race,
         "result":Race.objects.get_result(race.id),
         "lap_entry_form" : get_lap_entry_form(race.id)
     }
 
-    return render(request, "race/input_result.html", context)
+    return context
 
-@require_POST
-@login_required
-def addLap(request, pk):
-    race = get_object_or_404(Race, pk)
-    if not race.is_member(request.user) :
-        raise PermissionDenied
-
-def get_lap_entry_form(raceid):
+def get_lap_entry_form(raceid, *args, **kwargs):
     race = get_object_or_404(Race, pk=raceid)
 
     nums = []
     for entrant in race.entrant_set.all():
         nums.append(entrant.num)
 
-    return LapEntryForm(entrants=nums)
+    return LapEntryForm(entrants=nums, *args, **kwargs)

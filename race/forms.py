@@ -177,7 +177,7 @@ class LapEntryForm(forms.ModelForm):
         race = self.instance
         num = self.cleaned_data["num"]
 
-        if not( Race.objects.filter(pk=race.id).filter(entrant_set_in = [num]).exists() ):
+        if not( Entrant.objects.filter(race=race).filter(num__in = [num]).exists() ):
             raise ValidationError(
                 message="存在しないゼッケンNoです。"
             )

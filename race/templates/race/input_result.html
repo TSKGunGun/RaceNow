@@ -35,7 +35,7 @@
                     </td>
                     <td class="text-center">{{ item.lapcount }}</td>
                     {% if item.lasttime %}
-                    <td>{{ item.lasttime }}</tdclass=>
+                    <td>{{ item.lasttime |date:"h:m:s" }}</tdclass=>
                     {% else %}
                     <td><span class="text-muted">---</span></td>
                     {% endif %}
@@ -80,7 +80,7 @@
 <div class="modal fade" id="LapEntryModal" tabindex="-1" aria-labelledby="LapEntryModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="#">
+            <form action="{% url 'add_lap' object.id %}" method="POST">
                 <div class="modal-header">
                     <h5 class="modal-title" id="LapEntryModalLabel">ラップ追加</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
