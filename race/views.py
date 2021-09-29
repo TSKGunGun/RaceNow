@@ -209,17 +209,12 @@ def addLap(request, pk):
     
     form = get_lap_entry_form(race.id, data=request.POST, instance=race)
     if form.is_valid():
-        result = Entrant.objects.filter(race=race).filter(num=request.POST["num"])
-        if result.count() == 1 :
-            entrant = get_object_or_404(Entrant, pk=result[0].id)
-            Lap.objects.create(
-                entrant = entrant
-            )
-            return redirect('input_result', pk=race.id)
-
-        else:
-            raise BadRequest
-
+        entrant = get_object_or_404(Entrant, pk=request.POST["num"])    
+        Lap.objects.create(
+            entrant = entrant
+        )
+        return redirect('input_result', pk=race.id)
+        
     return render(request, "race/input_result.html", get_context_resultinput(race.id))
     
 def get_context_resultinput(raceid):
@@ -237,6 +232,6 @@ def get_lap_entry_form(raceid, *args, **kwargs):
 
     nums = []
     for entrant in race.entrant_set.all():
-        nums.append(entrant.num)
+        nums.append({"id": entrant.id, "num":entrant.num})
 
     return LapEntryForm(entrants=nums, *args, **kwargs)

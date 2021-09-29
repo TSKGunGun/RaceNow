@@ -165,7 +165,7 @@ class ResutInput_View_Test(TestCase):
         self.client.force_login(self.user)
 
         params={
-            "num" : self.ent1.num
+            "num" : self.ent1.id
         }
         response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
         self.assertTrue(Lap.objects.exists())
@@ -177,7 +177,7 @@ class ResutInput_View_Test(TestCase):
         self.client.logout()
 
         params={
-            "num" : self.ent1.num
+            "num" : self.ent1.id
         }
 
         response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
@@ -192,7 +192,7 @@ class ResutInput_View_Test(TestCase):
         self.client.force_login(usr2)
         
         params={
-            "num" : self.ent1.num
+            "num" : self.ent1.id
         }
 
         response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)

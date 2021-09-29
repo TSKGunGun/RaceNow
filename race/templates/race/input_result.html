@@ -86,8 +86,30 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                {% csrf_token %}
-                {% bootstrap_form lap_entry_form %}
+                    {% csrf_token %}
+                    {% bootstrap_form lap_entry_form %}
+                    <div class="card">
+                    <span class="card-header h5">エントラント情報</span>
+                    <div class="card-body">
+                        <table class="table">
+                            <tr>
+                                <th>チーム名</th>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th>メンバー</th>
+                                <td>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="table">
+                            <th>周回数</th>
+                            <th>入力時間</th>
+                        </table>
+                    </div>
+                </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">キャンセル</button>
@@ -102,7 +124,7 @@
 {% block script %}
 <script>
     var activeRow = -1;
-    var select_entNum = -1;
+    var select_entId = -1;
     var resultTable = document.querySelector("#result_data");
     Array.from(resultTable.getElementsByTagName("tr")).forEach(element => {
         element.addEventListener('click', function(event){
@@ -111,19 +133,19 @@
             }
             if(element.rowIndex == 0 ) {
                 activeRow = -1;
-                select_entNum = -1;
+                select_entId = -1;
             } else {
                 activeRow = element.rowIndex;
-                select_entNum = element.cells[2].innerText;
+                select_entId = element.cells[0].innerText;
                 element.classList.add("bg-info");
             }
         })    
     });
 
     document.querySelector("#LapEntryModal").addEventListener('show.bs.modal', function(event){
-        if(select_entNum > 0) {
+        if(select_entId > 0) {
             Array.from(document.querySelector('#id_num').getElementsByTagName('option')).forEach(element=>{
-                if( element.innerText == select_entNum ){
+                if( element.value == select_entId ){
                     element.selected = true;
                 }
             }

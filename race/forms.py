@@ -170,14 +170,13 @@ class LapEntryForm(forms.ModelForm):
     num = forms.ChoiceField(label="ゼッケンNo")
 
     def __init__(self, entrants=None, *args, **kwargs) :
-        self.base_fields["num"].choices = [('-1', '---')] + [ (v, v) for v in entrants]
+        self.base_fields["num"].choices = [('-1', '---')] + [ (entrant["id"], entrant["num"]) for entrant in entrants ]
         super().__init__(*args, **kwargs)
 
     def clean_num(self):
-        race = self.instance
         num = self.cleaned_data["num"]
 
-        if not( Entrant.objects.filter(race=race).filter(num__in = [num]).exists() ):
+        if not( Entrant.objects.filter(pk=num).exists() ):
             raise ValidationError(
                 message="存在しないゼッケンNoです。"
             )
