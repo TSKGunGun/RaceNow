@@ -1,11 +1,10 @@
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ValidationError
-from django.db.models import fields
 from django.utils import timezone
 from .models import Category, Lap, Race, RaceType, Entrant
 from place.models import Place
-from django.forms.widgets import Select, TextInput
+from django.forms.widgets import Select
 import json
 
 class RaceTypeSelect(Select):
