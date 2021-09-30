@@ -1,0 +1,47 @@
+<div class="continer-fluid">
+    <div class="row text-light" style="background-color: crimson;">
+        <div class="col">
+            <div class="p-3">
+                <span class="h5">{{ object.name }} リザルト</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <table class="table table-striped table-hover table-ranking" id="result_data">
+        <tr>
+            <th hidden>ID</th>
+            <th class="text-center">順位</th>
+            <th class="text-center">ゼッケンNo</th>
+            <th>チーム名</th>
+            <th>ライダー</th>
+            <th class="text-center">周回数</th>
+            <th class>最終計測時間<br>
+            </th>
+        </tr>
+        {% for item in result %}
+        <tr>
+            <td hidden>{{ item.id }}</td>
+            <td class="text-center">
+                <span class="h4">
+                    {{ forloop.counter }}
+                </span>
+            </td>
+            <td class="text-center">{{ item.num }}</td>
+            <td>{{ item.team_name }}</td>
+            <td>
+                {% for member in item.entrant_member_set.all %}
+                    {{ member.name }} /
+                {% endfor %}
+            </td>
+            <td class="text-center">{{ item.lapcount }}</td>
+            {% if item.lasttime %}
+            <td>{{ item.lasttime |date:"H:i:s" }}</tdclass=>
+            {% else %}
+            <td><span class="text-muted">---</span></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
