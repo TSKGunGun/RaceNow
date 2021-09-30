@@ -166,7 +166,7 @@ class AddEntrantForm(forms.ModelForm):
         fields = ('team_name', 'num')
 
 
-class LapEntryForm(forms.ModelForm):
+class LapForm(forms.ModelForm):
     num = forms.ChoiceField(label="ゼッケンNo")
 
     def __init__(self, entrants=None, *args, **kwargs) :
@@ -186,4 +186,3 @@ class LapEntryForm(forms.ModelForm):
     class Meta:
         model = Lap
         fields = ("num",)
-    

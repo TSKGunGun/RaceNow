@@ -241,3 +241,99 @@ class GetEntrantInfo_Test(TestCase):
         self.assertEqual(len(laps.keys()), 2)
         self.assertEqual(laps["1"]["input_time"], (startdatetime + timedelta(minutes=10)).astimezone(tz).strftime("%Y/%m/%d %H:%M:%S") )
         self.assertEqual(laps["2"]["input_time"], (startdatetime + timedelta(minutes=20, seconds=1)).astimezone(tz).strftime("%Y/%m/%d %H:%M:%S"))
+
+class deleteLap_View_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+        self.ent1 = EntrantFactory(race=self.race)
+        self.ent2 = EntrantFactory(race=self.race)
+
+        self.user = get_user_model().objects.first()
+
+    @patch('django.utils.timezone.now', return_value=datetime(2021, 1, 1, 1, 1 ,1, tzinfo=timezone.utc))
+    def test_deletelap(self, _mock_now):
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        startdatetime = timezone.now()
+        l1 = Lap_Factory(entrant=self.ent1)
+
+        _mock_now.return_value = startdatetime + timedelta(minutes=10)
+        l2 = Lap_Factory(entrant=self.ent1)
+
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 2)
+        
+        params={
+            "num" : self.ent1.id
+        }
+
+        response = self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.last().created_at, l1.created_at )
+    
+    @patch('django.utils.timezone.now', return_value=datetime(2021, 1, 1, 1, 1 ,1, tzinfo=timezone.utc))
+    def test_deletelap_2(self, _mock_now):
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        startdatetime = timezone.now()
+        l1 = Lap_Factory(entrant=self.ent1)
+
+        _mock_now.return_value = startdatetime + timedelta(minutes=10)
+        l2 = Lap_Factory(entrant=self.ent1)
+
+        _mock_now.return_value = startdatetime - timedelta(minutes=10)
+        l3 = Lap_Factory(entrant=self.ent1)
+
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 3)
+        
+        params={
+            "num" : self.ent1.id
+        }
+
+        response = self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
+
+        self.assertEqual(response.status_code, 302)
+
+        ent = Entrant.objects.get(pk=self.ent1.id)
+        self.assertEqual(ent.lap_set.count(), 2)
+        self.assertTrue(ent.lap_set.filter(pk=l1.id).exists())
+        self.assertFalse(ent.lap_set.filter(pk=l2.id).exists())
+        self.assertTrue(ent.lap_set.filter(pk=l3.id).exists())
+
+    def test_deletelap_notmember(self):
+        self.client.logout()
+        usr2 = UserFactory()
+        self.client.force_login(usr2)
+
+        Lap_Factory(entrant=self.ent1)
+        
+        params={
+            "ent_id" : self.ent1.id
+        }
+        
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
+        response=self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
+
+
+    def test_deletelap_notlogin(self):
+        self.client.logout()
+
+        Lap_Factory(entrant=self.ent1)
+        
+        params={
+            "ent_id" : self.ent1.id
+        }
+        
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
+        response=self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)

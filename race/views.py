@@ -11,7 +11,7 @@ from account.models import Organizer
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
-from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapEntryForm
+from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapForm
 from django.db import transaction
 import json
 import pytz
@@ -209,7 +209,7 @@ def addLap(request, pk):
     if not race.is_member(request.user) :
         raise PermissionDenied
     
-    form = get_lap_entry_form(race.id, data=request.POST, instance=race)
+    form = get_lap_form(race.id, data=request.POST, instance=race)
     if form.is_valid():
         entrant = get_object_or_404(Entrant, pk=request.POST["num"])    
         Lap.objects.create(
@@ -219,24 +219,43 @@ def addLap(request, pk):
 
     return render(request, "race/input_result.html", get_context_resultinput(race.id))
     
+
+@require_POST
+@login_required
+def deleteLap(request, pk):
+    race = get_object_or_404(Race, pk=pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
+    
+    form = get_lap_form(race.id, data=request.POST, instance=race)
+
+    if form.is_valid():
+        entrant = get_object_or_404(Entrant, pk=request.POST["num"])    
+        lap = entrant.lap_set.order_by('-created_at').first()
+        lap.delete()
+
+        return redirect('input_result', pk=race.id)
+
+    return render(request, "race/input_result.html", get_context_resultinput(race.id))
+    
 def get_context_resultinput(raceid):
     race = get_object_or_404(Race, pk=raceid)
     context = {
         "object":race,
         "result":Race.objects.get_result(race.id),
-        "lap_entry_form" : get_lap_entry_form(race.id)
+        "lap_entry_form" : get_lap_form(race.id)
     }
 
     return context
 
-def get_lap_entry_form(raceid, *args, **kwargs):
+def get_lap_form(raceid, *args, **kwargs):
     race = get_object_or_404(Race, pk=raceid)
 
     nums = []
     for entrant in race.entrant_set.all():
         nums.append({"id": entrant.id, "num":entrant.num})
 
-    return LapEntryForm(entrants=nums, *args, **kwargs)
+    return LapForm(entrants=nums, *args, **kwargs)
 
 @require_GET
 def get_entrant_info(request, *args, **kwargs):
