@@ -14,6 +14,7 @@ from django.utils.decorators import method_decorator
 from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapEntryForm
 from django.db import transaction
 import json
+import pytz
 
 # Create your views here.
 @method_decorator(login_required, name='dispatch')
@@ -252,8 +253,9 @@ def get_entrant_info(request, *args, **kwargs):
 def get_lap_info(entrant):
     laps = {}
     count = 1
-    for lap in entrant.lap_set.all():
-        laps[str(count)] = { "input_time" : lap.created_at }
+    tz = pytz.timezone('Asia/Tokyo')
+    for lap in entrant.lap_set.all().order_by("created_at"):
+        laps[str(count)] = { "input_time" : lap.created_at.astimezone(tz).strftime("%Y/%m/%d %H:%M:%S") }
         count += 1
     
     return laps

@@ -2,6 +2,7 @@ import json
 from time import timezone
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+import pytz
 from race.models import Race, Lap, Entrant
 from .factories import RaceFactory, EntrantFactory, Entrant_Member_Factory, Lap_Factory
 from account.tests.factories import UserFactory, OrganizerFactory
@@ -236,6 +237,7 @@ class GetEntrantInfo_Test(TestCase):
         self.assertEqual(data["member"][2], m3.name)
         
         laps = data["laps"]
+        tz = pytz.timezone("Asia/Tokyo")
         self.assertEqual(len(laps.keys()), 2)
-        self.assertEqual(datetime.strptime(laps["1"]["input_time"], '%Y-%m-%dT%H:%M:%S%z'), startdatetime + timedelta(minutes=10))
-        self.assertEqual(datetime.strptime(laps["2"]["input_time"], '%Y-%m-%dT%H:%M:%S%z'), startdatetime + timedelta(minutes=20, seconds=1))
+        self.assertEqual(laps["1"]["input_time"], (startdatetime + timedelta(minutes=10)).astimezone(tz).strftime("%Y/%m/%d %H:%M:%S") )
+        self.assertEqual(laps["2"]["input_time"], (startdatetime + timedelta(minutes=20, seconds=1)).astimezone(tz).strftime("%Y/%m/%d %H:%M:%S"))
