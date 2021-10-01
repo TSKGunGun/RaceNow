@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}{{ object.name }} リザルト照会 {% endblock %}
+
+{% block contents %}
+<nav class="navbar navbar-expand-md navbar-light" style="background-color:lightgray;">
+    <div class="container-fluid">
+        <span class="navbar-bland">
+            <i class="bi bi-pencil-square"></i>リザルトメニュー</>
+        </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#resultmanagementcontent" aria-controls="resultmanagementcontent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="resultmanagementcontent">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item ms-2 mb-1">
+                    <a role="button" class="nav-link text-light btn btn-primary" data-bs-toggle="modal" data-bs-target="#LapModal" id="btn_showResult" >
+                        <i class="bi bi-speedometer2"></i>
+                        詳細データ表示
+                    </a>   
+                </li>
+                <li class="nav-item ms-2 mb-1">
+                    <a role="button" class="nav-link btn btn-info text-light" href="javascript:void(0)", onclick="download_CSV(this, document.querySelector('#result_data'), 'result.csv');" >
+                        <i class="bi bi-file-earmark-arrow-down"></i>
+                        CSVダウンロード
+                    </a>   
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% include 'race/parts_race_result.html' %}
+<!--LapEntryModl -->
+<div class="modal fade" id="LapModal" tabindex="-1" aria-labelledby="LapModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="LapModalLabel">エントラント情報</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% bootstrap_form lap_entry_form %}
+                <table class="table">
+                    <tr id="entrant_info_team_name">
+                        <th>チーム名</th>
+                        <td></td>
+                    </tr>
+                    <tr id="entrant_info_team_member">
+                        <th>メンバー</th>
+                        <td></td>
+                    </tr>
+                </table>
+                <table class="table table-scroll" id="entrant_laps">                            
+                    <tr>
+                        <th class="text-center th-fixed bg-light" style="width:100px;">周回数</th>
+                        <th class="th-fixed bg-light" style="width:75%;">入力時間</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+var activeRow = -1;
+var select_entId = -1;
+var resultTable = document.querySelector("#result_data");
+var num_selector = document.querySelector('#id_num');
+var lapmodal = document.querySelector('#LapModal')
+Array.from(resultTable.getElementsByTagName("tr")).forEach(element => {
+    element.addEventListener('click', function(event){
+        if(activeRow > 0){
+            resultTable.rows[activeRow].classList.remove("bg-info");
+        }
+        if(element.rowIndex == 0 ) {
+            activeRow = -1;
+            select_entId = -1;
+        } else {
+            activeRow = element.rowIndex;
+            select_entId = element.cells[0].innerText;
+            element.classList.add("bg-info");
+        }
+    })    
+});
+
+document.querySelector("#LapModal").addEventListener('show.bs.modal', function(event){
+    clean_entrant_data();
+    if(select_entId > 0) {
+        Array.from(num_selector.getElementsByTagName('option')).forEach(element=>{
+            if( element.value == select_entId ){
+                element.selected = true;
+            }
+        })
+        get_entrant_info(select_entId, set_entrant_data);
+    }
+})
+
+num_selector.addEventListener('change', function(event){
+    var entrant_id = num_selector.selectedOptions[0].value;
+    if ( entrant_id > 0 ) { 
+        get_entrant_info(entrant_id, set_entrant_data);
+    }
+})
+
+function set_entrant_data(ent_data){
+    document.querySelector('#entrant_info_team_name').cells[1].innerText = ent_data["team_name"];
+
+    var members_str=""
+    ent_data["member"].forEach( ele =>{
+        members_str += (ele + " / ")
+    })
+    document.querySelector('#entrant_info_team_member').cells[1].innerText = members_str
+
+    var lapTable = document.querySelector('#entrant_laps');
+    while(lapTable.rows.length > 1){
+        lapTable.rows[lapTable.rows.length-1].remove();
+    }
+
+    Object.keys(ent_data["laps"]).sort( (a,b) =>{
+        if( Number(a) > Number(b) ) return -1;
+        if( Number(a) < Number(b) ) return 1;
+        return 0;
+    }).forEach( key =>{
+        var addRow = lapTable.insertRow();
+        var lap = ent_data["laps"][key];
+        var countcell = addRow.insertCell()
+        countcell.classList.add("text-center")
+        countcell.appendChild(document.createTextNode(key));
+        addRow.insertCell().appendChild(document.createTextNode(lap["input_time"]));
+    })
+}
+
+function clean_entrant_data(){
+    num_selector.selectedIndex = 0;
+    document.querySelector('#entrant_info_team_name').cells[1].innerText = ""
+    document.querySelector('#entrant_info_team_member').cells[1].innerText = "";
+    var lapTable = document.querySelector('#entrant_laps');
+    while(lapTable.rows.length > 1){
+        lapTable.rows[lapTable.rows.length-1].remove();
+    } 
+}
+
+function get_entrant_info(entrant_id, callbackfunc){
+    var uri = '/race/entrants/' + entrant_id + '/getinfo';
+    fetch(uri)
+    .then( response => response.json() 
+    )
+    .then( data =>{callbackfunc(data);
+    }); 
+}
+
+function download_CSV(a, tableElement, filename){
+    var excaped = /,|\r?\n|\r|"/;
+    var e = /"/g;
+    var delmiter =",";
+    
+    var csv = [], r, c;
+    for ( r=0;  r <= tableElement.rows.length-1; r++ ){
+        var row = tableElement.rows[r];
+        var rowdata = [];
+        for( c=0; c <= row.cells.length-1; c++){
+            var flddata = row.cells[c].textContent;
+            if( excaped.test(flddata) ) {
+                flddata = '"'+flddata.replace(e, '""')+'"';
+            }
+            rowdata.push(flddata);
+        }
+        csv.push(rowdata.join(delmiter));
+    }
+
+    var bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    var blob = new Blob([bom, csv.join('\n')], {"type": 'text/csv'});
+    a.download = filename;
+    a.href = window.URL.createObjectURL(blob);
+}
+</script>
+{% endblock %}

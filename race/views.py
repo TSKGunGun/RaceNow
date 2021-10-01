@@ -62,6 +62,9 @@ class RaceDetailView(DetailView):
         context["IsMember"] =  self.object.organizer.members.filter(id=self.request.user.id).exists()
         context["Is_canstart"] = (self.object.status.id == RaceStatus.RACE_STATUS_DEFAULT)
         context["Is_RaceHold"] = (self.object.status.id == RaceStatus.RACE_STATUS_HOLD)
+        context["Is_ShowResult"] = (self.object.status.id >= RaceStatus.RACE_STATUS_HOLD)
+        context["result"] = Race.objects.get_result(self.object.id)[:3]
+        
         
         return context
 
@@ -278,3 +281,7 @@ def get_lap_info(entrant):
         count += 1
     
     return laps
+
+@require_GET
+def showResult(request, pk):
+    return render(request, "race/race_result.html", get_context_resultinput(pk))
