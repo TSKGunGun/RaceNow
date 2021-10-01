@@ -17,27 +17,18 @@
             <th>チーム名</th>
             <th>ライダー</th>
             <th class="text-center">周回数</th>
-            <th class>最終計測時間<br>
-            </th>
+            <th class>最終計測時間</th>
         </tr>
         {% for item in result %}
         <tr>
             <td hidden>{{ item.id }}</td>
-            <td class="text-center">
-                <span class="h4">
-                    {{ forloop.counter }}
-                </span>
-            </td>
+            <td class="text-center h4">{{ forloop.counter }}</td>
             <td class="text-center">{{ item.num }}</td>
             <td>{{ item.team_name }}</td>
-            <td>
-                {% for member in item.entrant_member_set.all %}
-                    {{ member.name }} /
-                {% endfor %}
-            </td>
+            <td>{% for member in item.entrant_member_set.all %}{{ member.name }} / {% endfor %}</td>
             <td class="text-center">{{ item.lapcount }}</td>
             {% if item.lasttime %}
-            <td>{{ item.lasttime |date:"H:i:s" }}</tdclass=>
+            <td>{{ item.lasttime |date:"H:i:s" }}</td>
             {% else %}
             <td><span class="text-muted">---</span></td>
             {% endif %}
