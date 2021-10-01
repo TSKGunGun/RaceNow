@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
-
 {% block title %}{{ object.name }} リザルト入力 {% endblock %}
 
 {% block contents %}
@@ -15,13 +14,13 @@
         <div class="collapse navbar-collapse" id="resultmanagementcontent">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item ms-2 mb-1">
-                    <a role="button" class="nav-link text-light btn btn-primary" data-bs-toggle="modal" data-bs-target="#LapEntryModal" >
+                    <a role="button" class="nav-link text-light btn btn-primary" data-bs-toggle="modal" data-bs-target="#LapModal" id="btn_lapadd" >
                         <i class="bi bi-speedometer2"></i>
                         ラップ追加
                     </a>   
                 </li>
                 <li class="nav-item ms-2 mb-1">
-                    <a role="button" class="nav-link btn btn-danger text-light">
+                    <a role="button" class="nav-link btn btn-danger text-light" data-bs-toggle="modal" data-bs-target="#LapModal" id="btn_lapdelete" >
                         <i class="bi bi-x-octagon-fill"></i>
                         ラップ削除
                     </a>   
@@ -38,15 +37,19 @@
 </nav>
 {% include 'race/parts_race_result.html' %}
 <!--LapEntryModl -->
-<div class="modal fade" id="LapEntryModal" tabindex="-1" aria-labelledby="LapEntryModalLabel" aria-hidden="true">
+<div class="modal fade" id="LapModal" tabindex="-1" aria-labelledby="LapModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{% url 'add_lap' object.id %}" method="POST">
+            <form action="{% url 'add_lap' object.id %}" method="POST" id="lapform_head">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="LapEntryModalLabel">ラップ追加</h5>
+                    <h5 class="modal-title" id="LapModalLabel">ラップ追加</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div id="form_explanation_delete">
+                        <span class="text-danger">最後のラップを削除します。</span><br>
+                        <small class="text-danger">ラップを複数削除したい場合、何回か実行してください。</small>
+                    </div>
                     {% csrf_token %}
                     {% bootstrap_form lap_entry_form %}
                     <div class="card">
@@ -74,7 +77,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">キャンセル</button>
-                    <button type="submit" class="btn btn-primary">ラップ追加</button>
+                    <button type="submit" class="btn btn-primary" id="lapform_submit_btn">ラップ追加</button>
                 </div>
             </form>
         </div>
@@ -84,91 +87,107 @@
 
 {% block script %}
 <script>
-    var activeRow = -1;
-    var select_entId = -1;
-    var resultTable = document.querySelector("#result_data");
-    var num_selector = document.querySelector('#id_num');
-
-    Array.from(resultTable.getElementsByTagName("tr")).forEach(element => {
-        element.addEventListener('click', function(event){
-            if(activeRow > 0){
-                resultTable.rows[activeRow].classList.remove("bg-info");
-            }
-            if(element.rowIndex == 0 ) {
-                activeRow = -1;
-                select_entId = -1;
-            } else {
-                activeRow = element.rowIndex;
-                select_entId = element.cells[0].innerText;
-                element.classList.add("bg-info");
-            }
-        })    
-    });
-
-    document.querySelector("#LapEntryModal").addEventListener('show.bs.modal', function(event){
-        clean_entrant_data();
-        if(select_entId > 0) {
-            Array.from(num_selector.getElementsByTagName('option')).forEach(element=>{
-                if( element.value == select_entId ){
-                    element.selected = true;
-                }
-            })
-            get_entrant_info(select_entId, set_entrant_data);
+var activeRow = -1;
+var select_entId = -1;
+var resultTable = document.querySelector("#result_data");
+var num_selector = document.querySelector('#id_num');
+var lapmodal = document.querySelector('#LapModal')
+Array.from(resultTable.getElementsByTagName("tr")).forEach(element => {
+    element.addEventListener('click', function(event){
+        if(activeRow > 0){
+            resultTable.rows[activeRow].classList.remove("bg-info");
         }
-    })
+        if(element.rowIndex == 0 ) {
+            activeRow = -1;
+            select_entId = -1;
+        } else {
+            activeRow = element.rowIndex;
+            select_entId = element.cells[0].innerText;
+            element.classList.add("bg-info");
+        }
+    })    
+});
+
+document.querySelector('#btn_lapadd').addEventListener('click', function(event){
+    lapmodal.querySelector('#LapModalLabel').innerText = "ラップ追加";
+    lapmodal.querySelector('#form_explanation_delete').style.display = "none";
     
-    num_selector.addEventListener('change', function(event){
-        var entrant_id = num_selector.selectedOptions[0].value;
-        if ( entrant_id > 0 ) { 
-            get_entrant_info(entrant_id, set_entrant_data);
-        }
+    lapmodal.querySelector('#lapform_head').setAttribute("action", "{% url 'add_lap' object.id %}")
+    lapmodal.querySelector('#lapform_submit_btn').innerText = "ラップ追加";
+})
+
+document.querySelector('#btn_lapdelete').addEventListener('click', function(event){
+    lapmodal.querySelector('#LapModalLabel').innerText = "ラップ削除";
+    lapmodal.querySelector('#form_explanation_delete').style.display = "block";
+
+    lapmodal.querySelector('#lapform_head').setAttribute("action", "{% url 'delete_lap' object.id %}")
+    lapmodal.querySelector('#lapform_submit_btn').innerText = "ラップ削除";
+})
+
+document.querySelector("#LapModal").addEventListener('show.bs.modal', function(event){
+    clean_entrant_data();
+    if(select_entId > 0) {
+        Array.from(num_selector.getElementsByTagName('option')).forEach(element=>{
+            if( element.value == select_entId ){
+                element.selected = true;
+            }
+        })
+        get_entrant_info(select_entId, set_entrant_data);
+    }
+})
+
+num_selector.addEventListener('change', function(event){
+    var entrant_id = num_selector.selectedOptions[0].value;
+    if ( entrant_id > 0 ) { 
+        get_entrant_info(entrant_id, set_entrant_data);
+    }
+})
+
+function set_entrant_data(ent_data){
+    document.querySelector('#entrant_info_team_name').cells[1].innerText = ent_data["team_name"];
+
+    var members_str=""
+    ent_data["member"].forEach( ele =>{
+        members_str += (ele + " / ")
     })
+    document.querySelector('#entrant_info_team_member').cells[1].innerText = members_str
 
-    function set_entrant_data(ent_data){
-        document.querySelector('#entrant_info_team_name').cells[1].innerText = ent_data["team_name"];
-    
-        var members_str=""
-        ent_data["member"].forEach( ele =>{
-            members_str += (ele + " / ")
-        })
-        document.querySelector('#entrant_info_team_member').cells[1].innerText = members_str
-
-        var lapTable = document.querySelector('#entrant_laps');
-        while(lapTable.rows.length > 1){
-            lapTable.rows[lapTable.rows.length-1].remove();
-        }
-
-        Object.keys(ent_data["laps"]).sort( (a,b) =>{
-            if( Number(a) > Number(b) ) return -1;
-            if( Number(a) < Number(b) ) return 1;
-            return 0;
-        }).forEach( key =>{
-            var addRow = lapTable.insertRow();
-            var lap = ent_data["laps"][key];
-            var countcell = addRow.insertCell()
-            countcell.classList.add("text-center")
-            countcell.appendChild(document.createTextNode(key));
-            addRow.insertCell().appendChild(document.createTextNode(lap["input_time"]));
-        })
+    var lapTable = document.querySelector('#entrant_laps');
+    while(lapTable.rows.length > 1){
+        lapTable.rows[lapTable.rows.length-1].remove();
     }
 
-    function clean_entrant_data(){
-        num_selector.selectedIndex = 0;
-        document.querySelector('#entrant_info_team_name').cells[1].innerText = ""
-        document.querySelector('#entrant_info_team_member').cells[1].innerText = "";
-        var lapTable = document.querySelector('#entrant_laps');
-        while(lapTable.rows.length > 1){
-            lapTable.rows[lapTable.rows.length-1].remove();
-        } 
-    }
+    Object.keys(ent_data["laps"]).sort( (a,b) =>{
+        if( Number(a) > Number(b) ) return -1;
+        if( Number(a) < Number(b) ) return 1;
+        return 0;
+    }).forEach( key =>{
+        var addRow = lapTable.insertRow();
+        var lap = ent_data["laps"][key];
+        var countcell = addRow.insertCell()
+        countcell.classList.add("text-center")
+        countcell.appendChild(document.createTextNode(key));
+        addRow.insertCell().appendChild(document.createTextNode(lap["input_time"]));
+    })
+}
 
-    function get_entrant_info(entrant_id, callbackfunc){
-        var uri = '/race/entrants/' + entrant_id + '/getinfo';
-        fetch(uri)
-        .then( response => response.json() 
-        )
-        .then( data =>{callbackfunc(data);
-        }); 
-    }
+function clean_entrant_data(){
+    num_selector.selectedIndex = 0;
+    document.querySelector('#entrant_info_team_name').cells[1].innerText = ""
+    document.querySelector('#entrant_info_team_member').cells[1].innerText = "";
+    var lapTable = document.querySelector('#entrant_laps');
+    while(lapTable.rows.length > 1){
+        lapTable.rows[lapTable.rows.length-1].remove();
+    } 
+}
+
+function get_entrant_info(entrant_id, callbackfunc){
+    var uri = '/race/entrants/' + entrant_id + '/getinfo';
+    fetch(uri)
+    .then( response => response.json() 
+    )
+    .then( data =>{callbackfunc(data);
+    }); 
+}
 </script>
 {% endblock %}
