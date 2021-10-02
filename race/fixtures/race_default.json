@@ -48,19 +48,26 @@
         "model": "race.racestatus", 
         "pk": 2, 
         "fields": {
-            "name": "レース開催中"
+            "name": "参加受付中"
         }
     },
     {
         "model": "race.racestatus", 
         "pk": 3, 
         "fields": {
-            "name": "レース終了"
+            "name": "レース開催中"
         }
     },
     {
         "model": "race.racestatus", 
         "pk": 4, 
+        "fields": {
+            "name": "レース終了"
+        }
+    },
+    {
+        "model": "race.racestatus", 
+        "pk": 5, 
         "fields": {
             "name": "レース中止"
         }

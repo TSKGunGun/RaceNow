@@ -27,10 +27,10 @@ class RaceType(models.Model):
 
 class RaceStatus(models.Model):
     RACE_STATUS_DEFAULT = 1
-    RACE_STATUS_HOLD = 2
-    RACE_STATUS_END = 3
-    RACE_STATUS_CANCEL = 4
-
+    RACE_STATUS_ENTRY = 2
+    RACE_STATUS_HOLD = 3
+    RACE_STATUS_END = 4
+    RACE_STATUS_CANCEL = 5
 
     name = models.CharField(verbose_name="ステータス",  null=False, max_length=10)
 

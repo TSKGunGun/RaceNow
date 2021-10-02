@@ -22,6 +22,7 @@ class RaceTypeTest(Custom_TestCase):
 class RaceStatusTest(Custom_TestCase):
     def test_defaultItems(self):
         self.assertEqual(RaceStatus.objects.get(pk=1).name, "レース開催前")
-        self.assertEqual(RaceStatus.objects.get(pk=2).name, "レース開催中")
-        self.assertEqual(RaceStatus.objects.get(pk=3).name, "レース終了")
-        self.assertEqual(RaceStatus.objects.get(pk=4).name, "レース中止")
+        self.assertEqual(RaceStatus.objects.get(pk=2).name, "参加受付中")
+        self.assertEqual(RaceStatus.objects.get(pk=3).name, "レース開催中")
+        self.assertEqual(RaceStatus.objects.get(pk=4).name, "レース終了")
+        self.assertEqual(RaceStatus.objects.get(pk=5).name, "レース中止")
