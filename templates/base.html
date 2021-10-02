@@ -63,7 +63,7 @@
         </div>
     </nav>
     {% if not user.is_authenticated %}
-    <div class="container-fluid" style="background-color: #f5f5f5;" >
+    <div class="container-fluid" style="background-color: #f5f5f5; display: none;"   >
         <div class="py-2 mx-auto text-center">
             ユーザー登録してレースのライブリザルトを発信しませんか? 
             <a class="btn btn-primary ms-2" href="{% url 'account_create' %}">新規登録</a>
