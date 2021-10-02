@@ -12,7 +12,7 @@
                 </div>
                 <div class="ms-3 mt-1">
                     <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" style="background-color: #1DA1F2;" data-show-count="false"
-                    data-text="{{ object.name }}レース結果をシェア!" data-url="{{ request.get_host }}{% url 'show_result' object.id %}">ツイート</a>
+                    data-text="【RaceNow】{{ object.name }} レース結果をシェア!" data-url="{{ request.get_host }}{% url 'show_result' object.id %}">ツイート</a>
                 </div>
                 <div class="ms-3" style="margin-top: -5px;">
                     <div class="fb-share-button" data-href="{{ request.get_host }}{% url 'show_result' object.id %}" data-layout="button" data-size="small">
