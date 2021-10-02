@@ -1,36 +1,106 @@
-from os import stat_result
+from django.http import response
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 from account.models import Organizer
-from place.models import Place
 from race.models import Race, RaceStatus, RaceType
-from django.utils import timezone
+from .factories import RaceFactory,EntrantFactory,Lap_Factory,Entrant_Member_Factory
+from account.tests.factories import UserFactory, OrganizerFactory
+from django.urls import reverse
 
 class Race_Model_Test(TestCase):
-    fixtures = ['race_default.json', 'race_status_default.json']
+    fixtures = ['race_default.json']
     
     def setUp(self) -> None:
-        self.user = get_user_model().objects.create_user(
-            username = "test_user",
-            password = "password"
-        )
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+    
+    def test_get_regulationsetup(self):
+        self.client.logout()
+        self.client.force_login(self.user)
 
-        self.org = Organizer.objects.create(
-            owner = self.user,
-            name = "test_organizer",
-            email_address = "test@example.com"
-        )
+        self.assertEqual(Race.objects.get(pk=self.race.id).status.id, RaceStatus.RACE_STATUS_DEFAULT )
+        response = self.client.get(reverse("regulations_setup", kwargs={"pk":self.race.id}))
 
-        self.place = Place.objects.create(
-            owner = self.user,
-            name = "test_place",
-            address = "test_place_address"
-        )
+        self.assertEqual(response.status_code, 200)
 
-        self.race = Race.objects.create(
-            organizer = self.org,
-            event_date = timezone.now(),
-            name = "test_race",
-            place = self.place,
-            status = RaceStatus.objects.get(pk=1)
-        )
+    def test_get_regulationsetup_notlogin(self):
+        self.client.logout()
+
+        self.assertEqual(Race.objects.get(pk=self.race.id).status.id, RaceStatus.RACE_STATUS_DEFAULT )
+        response = self.client.get(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_get_regulationsetup_notMember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+
+        self.assertEqual(Race.objects.get(pk=self.race.id).status.id, RaceStatus.RACE_STATUS_DEFAULT )
+        response = self.client.get(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_get_regulationsetup_notMatchStatus(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        invalid_statuses = [RaceStatus.RACE_STATUS_ENTRY, RaceStatus.RACE_STATUS_HOLD, RaceStatus.RACE_STATUS_END, RaceStatus.RACE_STATUS_CANCEL]
+        
+        for status in invalid_statuses:
+            with self.subTest(status=status):
+                self.race.status = RaceStatus.objects.get(id=status)
+                self.race.save()
+                self.assertEqual(Race.objects.get(pk=self.race.id).status.id, status )
+                response = self.client.get(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+                self.assertNotEqual(response.status_code, 200)
+
+        self.race.status = RaceStatus.objects.get(id=RaceStatus.RACE_STATUS_DEFAULT)
+        self.race.save()
+        response = self.client.get(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_regulationsetup(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        self.assertEqual(Race.objects.get(pk=self.race.id).status.id, RaceStatus.RACE_STATUS_DEFAULT )
+        response = self.client.post(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_regulationsetup_notlogin(self):
+        self.client.logout()
+
+        self.assertEqual(Race.objects.get(pk=self.race.id).status.id, RaceStatus.RACE_STATUS_DEFAULT )
+        response = self.client.post(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_get_regulationsetup_notMember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+
+        self.assertEqual(Race.objects.get(pk=self.race.id).status.id, RaceStatus.RACE_STATUS_DEFAULT )
+        response = self.client.post(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_get_regulationsetup_notMatchStatus(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        invalid_statuses = [RaceStatus.RACE_STATUS_ENTRY, RaceStatus.RACE_STATUS_HOLD, RaceStatus.RACE_STATUS_END, RaceStatus.RACE_STATUS_CANCEL]
+        
+        for status in invalid_statuses:
+            with self.subTest(status=status):
+                self.race.status = RaceStatus.objects.get(id=status)
+                self.race.save()
+                self.assertEqual(Race.objects.get(pk=self.race.id).status.id, status )
+                response = self.client.post(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+                self.assertNotEqual(response.status_code, 200)
+
+        self.race.status = RaceStatus.objects.get(id=RaceStatus.RACE_STATUS_DEFAULT)
+        self.race.save()
+        response = self.client.post(reverse("regulations_setup", kwargs={"pk":self.race.id}))
+        self.assertEqual(response.status_code, 200)
+

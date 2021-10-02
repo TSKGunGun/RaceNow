@@ -84,10 +84,16 @@ def get_regulation_template(racetype):
             messages = f"未対応のRaceType { racetype.id }:{racetype.name}が検出されました。" 
         )
 
-
+@method_decorator(login_required, name='dispatch')
 class RegulationSetupView(TemplateView):
     def get(self, request, *args, **kwargs):
         race = get_object_or_404(Race,pk=kwargs["pk"])
+        if not race.is_member(request.user) :
+            raise PermissionDenied
+
+        if race.status.id != RaceStatus.RACE_STATUS_DEFAULT :
+            raise PermissionDenied
+        
         template_name = get_regulation_template(race.racetype)
         context = {
                 "race":race,
@@ -98,6 +104,12 @@ class RegulationSetupView(TemplateView):
 
     def post(self, request, *args, **kwargs):
         race = get_object_or_404(Race,pk=kwargs["pk"])
+        if not race.is_member(request.user) :
+            raise PermissionDenied
+
+        if race.status.id != RaceStatus.RACE_STATUS_DEFAULT :
+            raise PermissionDenied
+
         form = get_regulation_form(race.racetype)
         form = form(request.POST)
         
