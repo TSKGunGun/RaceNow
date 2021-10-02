@@ -1,8 +1,24 @@
 <div class="continer-fluid">
-    <div class="row text-light" style="background-color: crimson;">
-        <div class="col">
+    <div class="row text-light justify-content-between" style="background-color: crimson;">
+        <div class="col-md-7">
             <div class="p-3">
                 <span class="h5">{{ object.name }} リザルト</span>
+            </div>
+        </div>
+        <div class="col-md-5 d-flex align-items-center">
+            <div class="border border-2 rounded bg-light h-75 align-items-center text-muted d-flex h-stack p-2 w-100">
+                <div class="ms-2">
+                    SNSでシェア!
+                </div>
+                <div class="ms-3 mt-1">
+                    <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" style="background-color: #1DA1F2;" data-show-count="false"
+                    data-text="{{ object.name }}レース結果をシェア!" data-url="{{ request.get_host }}{% url 'show_result' object.id %}">ツイート</a>
+                </div>
+                <div class="ms-3" style="margin-top: -5px;">
+                    <div class="fb-share-button" data-href="{{ request.get_host }}{% url 'show_result' object.id %}" data-layout="button" data-size="small">
+                        <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fracenow.pythonanywhere.com%2Frace%2F1%2Fshowresult&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">シェア</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
