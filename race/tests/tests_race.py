@@ -8,6 +8,8 @@ from place.models import Place
 from race.models import Race, RaceStatus, RaceType
 import datetime
 from race.forms import EventDateValidator
+from .factories import RaceFactory,EntrantFactory,Lap_Factory,Entrant_Member_Factory
+from account.tests.factories import UserFactory, OrganizerFactory
 
 class Race_Model_Test(TestCase):
     fixtures = ['race_default.json']
@@ -356,3 +358,132 @@ class Race_StartTest(TestCase):
         self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
         self.assertEqual(response.status_code, 403)
 
+
+class Race_FixedReglation(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.create_user(
+            username = "test_user",
+            password = "password"
+        )
+
+        self.org = Organizer.objects.create(
+            owner = self.user,
+            name = "test_organizer",
+            email_address = "test@example.com"
+        )
+        self.org.members.add(self.user)
+
+        self.place = Place.objects.create(
+            owner = self.user,
+            name = "test_place",
+            address = "test_place_address"
+        )
+
+        self.race = Race.objects.create(
+            organizer = self.org,
+            place = self.place,
+            name = "test_race",
+            racetype = RaceType.objects.get(pk=1),
+            event_date = timezone.now(),
+            url = ""
+        )
+
+    def test_changeRaceStatus(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        self.assertEqual(self.race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+
+        response = self.client.post(f"/race/{self.race.id}/startrace")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_HOLD)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response=response, expected_url=f"/race/{self.race.id}/detail", status_code=302, target_status_code=200)
+
+    def test_getrequest(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        response = self.client.get(f"/race/{self.race.id}/startrace")
+
+        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 405)
+    
+    def test_notlogin(self):
+        self.client.logout()
+        self.assertEqual(self.race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+
+        response = self.client.post(f"/race/{self.race.id}/startrace")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+        self.assertEqual(response.status_code, 302)
+    
+    def test_notmember(self):
+        self.client.logout
+        other_usr = get_user_model().objects.create_user(
+            username = "testuser2",
+            password = "password"
+        )
+        self.client.force_login(other_usr)
+        response = self.client.post(f"/race/{self.race.id}/startrace")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+        self.assertEqual(response.status_code, 403)
+
+
+class fiexedreguration_View_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+        
+        self.user = get_user_model().objects.first()
+
+    def test_changeRaceStatus(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        self.assertEqual(self.race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+
+        response = self.client.post(f"/race/{self.race.id}/fixedregulation")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_ENTRY)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response=response, expected_url=f"/race/{self.race.id}/detail", status_code=302, target_status_code=200)
+
+    def test_getrequest(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        response = self.client.get(f"/race/{self.race.id}/fixedregulation")
+
+        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 405)
+    
+    def test_notlogin(self):
+        self.client.logout()
+        self.assertEqual(self.race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+
+        response = self.client.post(f"/race/{self.race.id}/fixedregulation")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+        self.assertEqual(response.status_code, 302)
+    
+    def test_notmember(self):
+        self.client.logout
+        other_usr = UserFactory()
+        self.client.force_login(other_usr)
+        response = self.client.post(f"/race/{self.race.id}/fixedregulation")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+        self.assertEqual(response.status_code, 403)
