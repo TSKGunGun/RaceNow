@@ -41,7 +41,7 @@
             <td class="text-center h4">{{ forloop.counter }}</td>
             <td class="text-center">{{ item.num }}</td>
             <td>{{ item.team_name }}</td>
-            <td>{% for member in item.entrant_member_set.all %}{{ member.name }} / {% endfor %}</td>
+            <td>{% for member in item.entrant_member_set.all %}{{ member.name }}{% if not forloop.last %} / {% endif %} {% endfor %}</td>
             <td class="text-center">{{ item.lapcount }}</td>
             {% if item.lasttime %}
             <td>{{ item.lasttime |date:"H:i:s" }}</td>

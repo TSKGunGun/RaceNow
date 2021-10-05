@@ -41,11 +41,7 @@ num_selector.addEventListener('change', function(event){
 function set_entrant_data(ent_data){
     document.querySelector('#entrant_info_team_name').cells[1].innerText = ent_data["team_name"];
 
-    var members_str=""
-    ent_data["member"].forEach( ele =>{
-        members_str += (ele + " / ")
-    })
-    document.querySelector('#entrant_info_team_member').cells[1].innerText = members_str
+    document.querySelector('#entrant_info_team_member').cells[1].innerText = ent_data["member"].join('/');
 
     var lapTable = document.querySelector('#entrant_laps');
     while(lapTable.rows.length > 1){
