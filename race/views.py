@@ -70,7 +70,9 @@ class RaceDetailView(DetailView):
         
         context["Is_ShowResult"] = (self.object.status.id >= RaceStatus.RACE_STATUS_HOLD)
         
+        context["entrants"] = self.object.entrant_set.all()[:3]
         context["result"] = Race.objects.get_result(self.object.id)[:3]
+        
         
         
         return context

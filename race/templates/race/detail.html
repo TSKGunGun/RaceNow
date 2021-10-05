@@ -171,6 +171,7 @@
                 <div class="d-flex justify-content-between p-2">
                     <div>
                         <span class="h3">エントラント</span>
+                        <span class="ms-4">{{ object.entrant_set.count }}エントリー</span>
                     </div>
                     <div>
                         {% if IsMember == True %}
@@ -195,14 +196,14 @@
         </div>
         <div class="row my-1">
             <div class="col">
-                {% if object.entrant_set.all %}
+                {% if entrants %}
                 <table class="table">
                     <tr>
                         <th>ゼッケンNo</th>
                         <th>エントラント名</th>
                         <th>メンバー氏名</th>
                     </tr>
-                    {% for entrant in object.entrant_set.all %}
+                    {% for entrant in entrants %}
                     <tr>
                         <td>{{ entrant.num }}</td>
                         {% if entrant.team_name %}
