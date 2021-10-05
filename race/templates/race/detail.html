@@ -29,19 +29,19 @@
                         <form action="{% url 'race_start' object.id %}" method="post">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-warning">レース開始</button>
+                        </form>
                     {% endif %}
                 </div>
                 {% endif %}
             </div>
         </div>
-</form>    
-
     </div>
-    <div class="row my-1 bg-light">
-        <div class="col">
+
+    <div class="card my-1">
+        <div class="card-header bg-light">
             <div class="d-flex justify-content-between p-2">
                 <div>
-                    <span class="h3">基本情報</span>
+                    <span class="h3"><i class="bi bi-grid-fill me-1"></i>基本情報</span>
                 </div>
                 <div>
                     {% if IsMember == True %}
@@ -50,9 +50,7 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col">
+        <div class="card-body">
             <table class="table">
                 <tr>
                     <th>開催場所</th>
@@ -83,11 +81,11 @@
     </div>
     <hr>
     <section id="race_regulation">
-        <div class="row my-3 bg-light">
-            <div class="col">
+        <div class="card my-3">
+            <div class="card-header bg-light">
                 <div class="d-flex justify-content-between p-2">
                     <div>
-                        <span class="h3">レースレギュレーション</span>
+                        <span class="h3"><i class="bi bi-card-checklist me-1"></i>レースレギュレーション</span>
                         {% if Is_CanChangeRegulation %}
                         <span class="badge bg-warning">レギュレーション未確定</span>
                         {% else %}
@@ -103,10 +101,8 @@
                         {% endif %}
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class=" row my-1">
-            <div class="col">    
+            </div> 
+            <div class="card-body">
                 {% if race.is_regulationsetuped %}
                 <table class="table">
                     <tr>
@@ -153,24 +149,34 @@
             </div>
         </div>
     </section>
-    <div class="row">
-        <div class="col">
-            <p class="h5">その他掲載情報</p>
-            {% if object.note %}
-            {{ object.note }}
-            {% else %}
-            <div class="p-3 border  border-4 rounded h5 text-center bg-noneinfo" >
-                記載なし
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <section id="race_entrant">
-        <div class="row my-3 bg-light">
-            <div class="col">
+    
+    <section id="#other_info">
+        <div class="card">
+            <div class="card-header bg-light">
                 <div class="d-flex justify-content-between p-2">
                     <div>
-                        <span class="h3">エントラント</span>
+                        <span class="h3"><i class="bi bi-journal me-1"></i>その他掲載情報</p></span>    
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if object.note %}
+                {{ object.note }}
+                {% else %}
+                <div class="p-3 border  border-4 rounded h5 text-center bg-noneinfo" >
+                    記載なし
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section id="race_entrant">
+        <div class="card my-3">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between p-2">
+                    <div>
+                        <span class="h3"><i class="bi bi-people-fill me-1"></i>エントラント</span>
                         <span class="ms-4">{{ object.entrant_set.count }}エントリー</span>
                     </div>
                     <div>
@@ -193,9 +199,7 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row my-1">
-            <div class="col">
+            <div class="card-body">
                 {% if entrants %}
                 <table class="table">
                     <tr>
@@ -215,7 +219,7 @@
                         {% endif %}
                         <td>
                             {% for member in entrant.entrant_member_set.all %}
-                                {{ member.name }} /
+                                {{ member.name }} {% if not forloop.last %} / {% endif %}
                             {% endfor %}
                         </td>
                     </tr>
@@ -233,13 +237,13 @@
             </div>
         </div>
     </section>
-    <hr>
+
     <section id="race_result">    
-        <div class="row my-3 bg-light">
-            <div class="col">
+        <div class="card my-3">
+            <div class="card-header bg-light">
                 <div class="d-flex justify-content-between p-2">
                     <div>
-                        <span class="h3">リザルト</span>
+                        <span class="h3"><i class="bi bi-trophy-fill me-1"></i>リザルト</span>
                     </div>
                     <div>
                         {% if IsMember == True %}
@@ -253,34 +257,34 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row my-1">
-            {% if Is_ShowResult %}
-            <table class="table table-striped table-hover table-ranking" id="result_data">
-                <tr>
-                    <th hidden>ID</th>
-                    <th class="text-center">順位</th>
-                    <th class="text-center">ゼッケンNo</th>
-                    <th>チーム名</th>
-                    <th>ライダー</th>
-                    <th class="text-center">周回数</th>
-                </tr>
-                {% for item in result %}
-                <tr>
-                    <td hidden>{{ item.id }}</td>
-                    <td class="text-center h4">{{ forloop.counter }}</td>
-                    <td class="text-center">{{ item.num }}</td>
-                    <td>{{ item.team_name }}</td>
-                    <td>{% for member in item.entrant_member_set.all %}{{ member.name }} / {% endfor %}</td>
-                    <td class="text-center">{{ item.lapcount }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% else %}
+            <div class="card-body">
+                {% if Is_ShowResult %}
+                <table class="table table-striped table-hover table-ranking" id="result_data">
+                    <tr>
+                        <th hidden>ID</th>
+                        <th class="text-center">順位</th>
+                        <th class="text-center">ゼッケンNo</th>
+                        <th>チーム名</th>
+                        <th>ライダー</th>
+                        <th class="text-center">周回数</th>
+                    </tr>
+                    {% for item in result %}
+                    <tr>
+                        <td hidden>{{ item.id }}</td>
+                        <td class="text-center h4">{{ forloop.counter }}</td>
+                        <td class="text-center">{{ item.num }}</td>
+                        <td>{{ item.team_name }}</td>
+                        <td>{% for member in item.entrant_member_set.all %}{{ member.name }} {% if not forloop.last %} / {% endif %}  {% endfor %}</td>
+                        <td class="text-center">{{ item.lapcount }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
                 <div class="p-3 border  border-4 rounded h5 text-center bg-noneinfo" >
                     レース開催前のため、リザルトはありません。
                 </div>
             {% endif %}
+            </div>
         </div>
     </section>
 </div>
