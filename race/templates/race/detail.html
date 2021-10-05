@@ -81,7 +81,9 @@
                     <div>
                         {% if IsMember and Is_CanChangeRegulation %}
                             <a role="button" class="btn btn-primary"  href="">レギュレーション更新</a>
-                            <a role="button" class="btn btn-danger"  href="">レギュレーション確定</a>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#RegulationFixModal">
+                                レギュレーション確定
+                            </button>
                         {% endif %}
                     </div>
                 </div>
@@ -264,5 +266,27 @@
             {% endif %}
         </div>
     </section>
+</div>
+<!-- レギュレーション確定モーダル -->
+<div class="modal fade" id="RegulationFixModal" tabindex="-1" aria-labelledby="RegulationFixModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="RegulationFixModalLabel">レギュレーション確定確認</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <p>レースレギュレーションを確定してエントリー開始してももよろしいですか？</p>
+            <p class="text-danger">※レギュレーション確定後はレギュレーションを変更できなくなります。</p>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+            <form action="{% url 'race_fixedregulation' object.id %}", method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">レギュレーション確定</button>
+            </form>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
