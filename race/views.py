@@ -59,10 +59,17 @@ class RaceDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["IsMember"] =  self.object.organizer.members.filter(id=self.request.user.id).exists()
-        context["Is_canstart"] = (self.object.status.id == RaceStatus.RACE_STATUS_DEFAULT)
+        
+        context["IsMember"] = self.object.is_member(self.request.user)
+        context["Is_CanChangeRegulation"] = self.object.status.id < RaceStatus.RACE_STATUS_ENTRY
+        context["Is_Entry"] = self.object.status.id == RaceStatus.RACE_STATUS_ENTRY
+        
+        context["Is_canstart"] = (self.object.status.id == RaceStatus.RACE_STATUS_ENTRY and self.object.entrant_set.exist() )
+        
         context["Is_RaceHold"] = (self.object.status.id == RaceStatus.RACE_STATUS_HOLD)
+        
         context["Is_ShowResult"] = (self.object.status.id >= RaceStatus.RACE_STATUS_HOLD)
+        
         context["result"] = Race.objects.get_result(self.object.id)[:3]
         
         
