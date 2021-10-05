@@ -1,11 +1,14 @@
-<div class="d-flex justify-content-start align-items-center p-3 bg-light" style="border: 3px solid #556B2F; border-radius: 0.5rem;">
-    <div class="border border-2 rounded p-2">
+<div class="d-flex justify-content-start align-items-center p-1 p-md-3 bg-light" style="border: 3px solid #556B2F; border-radius: 0.5rem;">
+    <div class="border border-2 rounded p-2 d-none d-md-block">
         <img src="{{ MEDIA_URL}}{{ place.image }}" alt="placelogo" style="height:50px;">
     </div>
-    <div class="ms-3">
-        <div class="h3">{{ place.name }}</div>
+    <div class="ms-md-3">
+        <div class="h3 d-none d-md-block">{{ place.name }}</div>
+        <div class="h5 d-block d-md-none">
+            <a href="{{ place.url }}" target="_blank" rel="noopener noreferrer">{{ place.name }}</a>
+        </div>
         <div>{{ place.address }}</div>
-        <div>
+        <div class="d-none d-md-block">
             <i class="bi bi-link" style="color:#006400;"></i><a href="{{ place.url }}" target="_blank" rel="noopener noreferrer">{{ place.url }}</a>
         </div>
     </div>
