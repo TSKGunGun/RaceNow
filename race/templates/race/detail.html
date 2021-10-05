@@ -21,7 +21,9 @@
                         <span class="badge bg-secondary p-2 rounded">{{ object.status.name }}</span>
                     {% endif %}
                 </div>
+                {% if IsMember %}
                 <div class="border border-secondary border-3 rounded bg-dark p-3 d-flex h-stack">
+                    
                     <p class="text-light me-3">レースステータス変更</p>
                     {% if Is_canstart %}
                         <form action="{% url 'race_start' object.id %}" method="post">
@@ -29,6 +31,7 @@
                         <button type="submit" class="btn btn-warning">レース開始</button>
                     {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
 </form>    
