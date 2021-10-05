@@ -73,7 +73,7 @@ class RaceDetailView(DetailView):
         context["entrants"] = self.object.entrant_set.all()[:3]
         context["result"] = Race.objects.get_result(self.object.id)[:3]
         
-        
+        context["place"] = self.object.place
         
         return context
 
