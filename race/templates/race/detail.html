@@ -2,84 +2,120 @@
 {% load django_bootstrap5 %}
 
 {% block title %}{{ object.name }}詳細情報{% endblock %}
+{% block append_head%}
+<style>
+    section{
+        margin-top: -120px;
+        padding-top: 120px
+    }
+</style>
+{% endblock %}
+{% block bodyattribute %}
+data-bs-spy="scroll" data-bs-target="#navbarRaceContent"
+{% endblock %}
+
+{% block fixed_top %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <span class="h3">
+            {{ object.name }}
+            {% if object.status.id == 1 %}
+                <span class="badge bg-info p-2 rounded">{{ object.status.name }}</span>
+            {% elif object.status.id == 2 %}
+                <span class="badge bg-warning p-2 rounded">{{ object.status.name }}</span>
+            {% elif object.status.id == 3 %}
+                <span class="badge bg-success p-2 rounded">{{ object.status.name }}</span>
+            {% elif object.status.id == 4 %}
+                <span class="badge bg-secondary p-2 rounded">{{ object.status.name }}</span>
+            {% endif %}
+        </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarRaceContent" aria-controls="navbarRaceContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarRaceContent">
+            <ul class="nav nav-pills ms-2 me-auto mg-lg-0">
+                <li class="nav-item" aria-current="page">
+                    <a class="nav-link active" href="#race_baseinfo">基本情報</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#race_regulation">レースレギュレーション</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#other_info">その他掲載情報</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#race_entrant">エントラント</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="resultDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">リザルト</a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="resultDropDown">
+                        <li><a class="dropdown-item" href="#race_result">リザルト</a></li>
+                        <li><a class="dropdown-item" href="{% url 'show_result' object.id %}">全リザルト表示</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        {% if IsMember %}
+<div class="border border-secondary border-3 rounded bg-dark p-3 d-flex h-stack">        
+<p class="text-light me-3">レースステータス変更</p>
+{% if Is_canstart %}
+    <form action="{% url 'race_start' object.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-warning">レース開始</button>
+    </form>
+{% endif %}
+</div>
+{% endif %}
+    </div>
+</nav>
+{% endblock %}
 
 {% block contents %}
-
-<div class="container py-2">
-    <div class="row mb-5">
-        <div class="col">
-            <div class="d-flex justify-content-between">
-                <div class="display-5">
-                    {{ object.name }}
-                    {% if object.status.id == 1 %}
-                        <span class="badge bg-info p-2 rounded">{{ object.status.name }}</span>
-                    {% elif object.status.id == 2 %}
-                        <span class="badge bg-warning p-2 rounded">{{ object.status.name }}</span>
-                    {% elif object.status.id == 3 %}
-                        <span class="badge bg-success p-2 rounded">{{ object.status.name }}</span>
-                    {% elif object.status.id == 4 %}
-                        <span class="badge bg-secondary p-2 rounded">{{ object.status.name }}</span>
-                    {% endif %}
-                </div>
-                {% if IsMember %}
-                <div class="border border-secondary border-3 rounded bg-dark p-3 d-flex h-stack">
-                    
-                    <p class="text-light me-3">レースステータス変更</p>
-                    {% if Is_canstart %}
-                        <form action="{% url 'race_start' object.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-warning">レース開始</button>
-                        </form>
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <div class="card my-1">
-        <div class="card-header bg-light">
-            <div class="d-flex justify-content-between p-2">
-                <div>
-                    <span class="h3"><i class="bi bi-grid-fill me-1"></i>基本情報</span>
-                </div>
-                <div>
-                    {% if IsMember == True %}
-                    <a role="button" class="btn btn-primary" href="#">基本情報更新</a>
-                    {% endif %}
+<div class="container py-2" style="margin-top: 70px;">
+    <section id="race_baseinfo">
+        <div class="card my-1">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between p-2">
+                    <div>
+                        <span class="h3"><i class="bi bi-grid-fill me-1"></i>基本情報</span>
+                    </div>
+                    <div>
+                        {% if IsMember == True %}
+                        <a role="button" class="btn btn-primary" href="#">基本情報更新</a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>開催場所</th>
+                        <td>{% include 'place_info_card.html' %}</td>
+                    </tr>
+                    <tr>
+                        <th>開催日</th>
+                        <td>{{ object.event_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>主催団体</th>
+                        <td><a href="{% url 'organizer_detail' pk=object.organizer.id %}">{{ object.organizer.name }}</a></td>
+                    </tr>
+                    <tr>
+                        <th>レースカテゴリ</th>
+                        <td>{{ object.racetype.category.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>レース形式</th>
+                        <td>{{ object.racetype.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>ホームページURL</th>
+                        <td>{{ object.url }}</td>
+                    </tr>
+                </table>   
+            </div>
         </div>
-        <div class="card-body">
-            <table class="table">
-                <tr>
-                    <th>開催場所</th>
-                    <td>{% include 'place_info_card.html' %}</td>
-                </tr>
-                <tr>
-                    <th>開催日</th>
-                    <td>{{ object.event_date }}</td>
-                </tr>
-                <tr>
-                    <th>主催団体</th>
-                    <td><a href="{% url 'organizer_detail' pk=object.organizer.id %}">{{ object.organizer.name }}</a></td>
-                </tr>
-                <tr>
-                    <th>レースカテゴリ</th>
-                    <td>{{ object.racetype.category.name }}</td>
-                </tr>
-                <tr>
-                    <th>レース形式</th>
-                    <td>{{ object.racetype.name }}</td>
-                </tr>
-                <tr>
-                    <th>ホームページURL</th>
-                    <td>{{ object.url }}</td>
-                </tr>
-            </table>   
-        </div>
-    </div>
-    <hr>
+    </section>
     <section id="race_regulation">
         <div class="card my-3">
             <div class="card-header bg-light">
@@ -150,7 +186,7 @@
         </div>
     </section>
     
-    <section id="#other_info">
+    <section id="other_info">
         <div class="card">
             <div class="card-header bg-light">
                 <div class="d-flex justify-content-between p-2">
@@ -252,7 +288,7 @@
                             {% endif %}
                         {% endif %}
                         {% if Is_ShowResult %}
-                        <a href="{% url 'show_result' object.id %}" class="btn btn-primary">全リザルト照会</a>
+                        <a href="{% url 'show_result' object.id %}" class="btn btn-primary">全リザルト表示</a>
                         {% endif %}
                     </div>
                 </div>
