@@ -4,3 +4,4 @@ django_bootstrap5
 django-widget-tweaks
 factory_boy
 Faker
+Pillow
