@@ -92,7 +92,7 @@ class Entrant(models.Model):
     team_name = models.CharField(verbose_name="チーム名", max_length=60, null=True, blank=True)
 
     numValidator = NumValidator()
-    num = models.CharField(verbose_name="ゼッケンNo", max_length=10, null=False, blank=True, validators=[numValidator,])
+    num = models.CharField(verbose_name="ゼッケンNo", max_length=10, null=False, validators=[numValidator,])
 
     is_dns = models.BooleanField(verbose_name="DNS", default=False)
     is_dnf = models.BooleanField(verbose_name="DNF", default=False)

@@ -128,8 +128,11 @@ class Regulation_XC_Form(forms.Form):
         return cleaned_data
 
 class AddEntrantForm(forms.ModelForm):
-    num = forms.CharField(label="ゼッケンNo", max_length=10, required=True)
     members = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    def __init__(self, race=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.race = race
 
     def clean_members(self):
         membersjson = self.cleaned_data["members"]
@@ -146,7 +149,7 @@ class AddEntrantForm(forms.ModelForm):
                 message="メンバーデータが正常に取得できませんでした。"
             )
         
-        race = self.instance
+        race = self.race
         members_count = len(members.keys())
         if race.team_member_count_min > members_count :
             raise ValidationError(

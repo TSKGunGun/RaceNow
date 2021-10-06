@@ -155,10 +155,14 @@ class RegulationSetupView(TemplateView):
 class RaceIndexView(ListView):
     model = Race
     template_name = "race/list.html"
-
+    
+@method_decorator(login_required, name='dispatch')
 class AddEntrantView(TemplateView):
     def get(self, request, *args, **kwargs) :
         race = get_object_or_404(Race, pk=kwargs['pk'])
+        if not race.is_member(request.user) :
+            raise PermissionDenied
+        
         content = {
             "member_max": race.team_member_count_max,
             "member_min": race.team_member_count_min,
@@ -170,8 +174,10 @@ class AddEntrantView(TemplateView):
 
     def post(self,request, *args, **kwargs) :
         race = get_object_or_404(Race, pk=kwargs['pk'])
+        if not race.is_member(request.user) :
+            raise PermissionDenied
 
-        form = AddEntrantForm(request.POST, instance=race)
+        form = AddEntrantForm(race=race, data=request.POST)
         if form.is_valid() :
             decoder = json.JSONDecoder()
             members = decoder.decode(request.POST["members"])

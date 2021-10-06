@@ -28,6 +28,9 @@ class RaceFactory(factory.django.DjangoModelFactory):
     racetype = factory.SubFactory(RaceTypeFactory)
     event_date = fuzzy.FuzzyDate(start_date=datetime.today() + timedelta(days=1), end_date=datetime.today() + timedelta(days=100))
     place = factory.SubFactory(PlaceFactory)
+    is_teamrace = True
+    team_member_count_min = 1
+    team_member_count_max = 1
 
     class Meta:
         model = Race
