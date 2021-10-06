@@ -118,7 +118,6 @@ class Regulation_XC_Form(forms.Form):
         cleaned_data = super().clean()
         
         param = cleaned_data.get("is_teamrace")
-        print( f"is_teamrace:{ param } ")
 
         if cleaned_data.get("is_teamrace") : 
             if cleaned_data.get("teammember_count_min") > cleaned_data.get("teammember_count_max") :
