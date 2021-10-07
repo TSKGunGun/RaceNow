@@ -259,8 +259,7 @@ def addLap(request, pk):
         )
         return redirect('input_result', pk=race.id)
 
-    return render(request, "race/input_result.html", get_context_resultinput(race.id))
-    
+    return redirect('input_result', pk=race.id)
 
 @require_POST
 @login_required
@@ -281,7 +280,7 @@ def deleteLap(request, pk):
 
         return redirect('input_result', pk=race.id)
 
-    return render(request, "race/input_result.html", get_context_resultinput(race.id))
+    return redirect('input_result', pk=race.id)
     
 def get_context_resultinput(raceid):
     race = get_object_or_404(Race, pk=raceid)

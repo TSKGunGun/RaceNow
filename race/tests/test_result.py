@@ -3,6 +3,7 @@ from time import timezone
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls.base import reverse
+from django.views.decorators.http import require_POST
 import pytz
 from race.models import Race, Lap, Entrant, RaceStatus
 from .factories import RaceFactory, EntrantFactory, Entrant_Member_Factory, Lap_Factory
@@ -235,6 +236,20 @@ class ResutInput_View_Test(TestCase):
         self.assertFalse(Lap.objects.exists())
         self.assertFalse(Entrant.objects.get(pk=self.ent1.id).lap_set.exists())
 
+    def test_addlap_view_ngNum(self):
+        self.client.logout
+        self.client.force_login(self.user)
+
+        params = {
+            "num" : self.ent1.num + self.ent2.num
+        }
+
+        self.assertFalse(Entrant.objects.filter(num=params["num"]).exists() )
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("input_result", kwargs={"pk":self.race.id}))
+
 class GetEntrantInfo_Test(TestCase):
     fixtures = ['race_default.json']
 
@@ -414,6 +429,22 @@ class deleteLap_View_Test(TestCase):
         self.client.post(f"/race/{self.race.id}/inputresult/deletelap", data=params)
         self.assertFalse(Entrant.objects.get(pk=ent1.id).lap_set.all().exists())
         self.assertFalse(Entrant.objects.get(pk=ent2.id).lap_set.all().exists())
+
+    def test_addlap_view_ngNum(self):
+        self.client.logout
+        self.client.force_login(self.user)
+
+        Lap_Factory(entrant=self.ent1)
+
+        params = {
+            "num" : self.ent1.num + self.ent2.num
+        }
+
+        self.assertFalse(Entrant.objects.filter(num=params["num"]).exists() )
+        response = self.client.post(f"/race/{self.race.id}/inputresult/deletelap", data=params)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("input_result", kwargs={"pk":self.race.id}))
 
 class RaceShowResult_Test(TestCase):
     fixtures = ['race_default.json']
