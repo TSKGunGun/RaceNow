@@ -168,7 +168,7 @@ class ResutInput_View_Test(TestCase):
         self.client.force_login(self.user)
 
         params={
-            "num" : self.ent1.id
+            "num" : self.ent1.num
         }
 
         response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
@@ -176,12 +176,42 @@ class ResutInput_View_Test(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Lap.objects.first().entrant.id, self.ent1.id)
         self.assertEqual(Lap.objects.first().created_at, datetime(2021, 1, 1, 1, 1, 1, tzinfo=timezone.utc))
+    
+    def test_addlap_num_id(self):
+        ent1 = EntrantFactory()
+        ent2 = EntrantFactory()
+
+        ent1.num = ent2.id
+        ent1.save()
+
+        ent2.num = ent1.id
+        ent2.save()
+
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        params={
+            "num" : ent1.num
+        }
+
+        self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertTrue(Entrant.objects.get(pk=ent1.id).lap_set.all().exists())
+        self.assertFalse(Entrant.objects.get(pk=ent2.id).lap_set.all().exists())
+
+        params={
+            "num" : ent2.num
+        }
+
+        self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertEqual(Entrant.objects.get(pk=ent1.id).lap_set.all().count(), 1)
+        self.assertTrue(Entrant.objects.get(pk=ent2.id).lap_set.all().exists())
+
 
     def test_addlap_view_notlogin(self):
         self.client.logout()
 
         params={
-            "num" : self.ent1.id
+            "num" : self.ent1.num
         }
 
         response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
@@ -196,7 +226,7 @@ class ResutInput_View_Test(TestCase):
         self.client.force_login(usr2)
         
         params={
-            "num" : self.ent1.id
+            "num" : self.ent1.num
         }
 
         response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
@@ -270,7 +300,7 @@ class deleteLap_View_Test(TestCase):
         self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 2)
         
         params={
-            "num" : self.ent1.id
+            "num" : self.ent1.num
         }
 
         response = self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
@@ -296,7 +326,7 @@ class deleteLap_View_Test(TestCase):
         self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 3)
         
         params={
-            "num" : self.ent1.id
+            "num" : self.ent1.num
         }
 
         response = self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
@@ -314,7 +344,7 @@ class deleteLap_View_Test(TestCase):
         self.client.force_login(self.user)
 
         params={
-            "num" : self.ent1.id
+            "num" : self.ent1.num
         }
 
         response = self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
@@ -331,7 +361,7 @@ class deleteLap_View_Test(TestCase):
         Lap_Factory(entrant=self.ent1)
         
         params={
-            "ent_id" : self.ent1.id
+            "ent_id" : self.ent1.num
         }
         
         self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
@@ -346,13 +376,44 @@ class deleteLap_View_Test(TestCase):
         Lap_Factory(entrant=self.ent1)
         
         params={
-            "ent_id" : self.ent1.id
+            "ent_id" : self.ent1.num
         }
         
         self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
         response=self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
+
+    def test_deletelap_num_id(self):
+        ent1 = EntrantFactory()
+        ent2 = EntrantFactory()
+
+        ent1.num = ent2.id
+        ent1.save()
+        Lap_Factory(entrant=ent1)
+
+        ent2.num = ent1.id
+        ent2.save()
+        Lap_Factory(entrant=ent2)
+
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        params={
+            "num" : ent1.num
+        }
+
+        self.client.post(f"/race/{self.race.id}/inputresult/deletelap", data=params)
+        self.assertFalse(Entrant.objects.get(pk=ent1.id).lap_set.all().exists())
+        self.assertTrue(Entrant.objects.get(pk=ent2.id).lap_set.all().exists())
+
+        params={
+            "num" : ent2.num
+        }
+
+        self.client.post(f"/race/{self.race.id}/inputresult/deletelap", data=params)
+        self.assertFalse(Entrant.objects.get(pk=ent1.id).lap_set.all().exists())
+        self.assertFalse(Entrant.objects.get(pk=ent2.id).lap_set.all().exists())
 
 class RaceShowResult_Test(TestCase):
     fixtures = ['race_default.json']

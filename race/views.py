@@ -253,7 +253,7 @@ def addLap(request, pk):
     
     form = get_lap_form(race.id, data=request.POST, instance=race)
     if form.is_valid():
-        entrant = get_object_or_404(Entrant, pk=request.POST["num"])    
+        entrant = get_object_or_404(Entrant, num=request.POST["num"])    
         Lap.objects.create(
             entrant = entrant
         )
@@ -272,7 +272,7 @@ def deleteLap(request, pk):
     form = get_lap_form(race.id, data=request.POST, instance=race)
 
     if form.is_valid():
-        entrant = get_object_or_404(Entrant, pk=request.POST["num"])    
+        entrant = get_object_or_404(Entrant, num=request.POST["num"])    
         if not( entrant.lap_set.all().exists() ):
             return redirect('input_result', pk=race.id)
             

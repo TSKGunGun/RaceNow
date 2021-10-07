@@ -136,6 +136,13 @@ document.querySelector('#btn_lapdelete').addEventListener('click', function(even
     lapmodal.querySelector('#lapform_submit_btn').innerText = "ラップ削除";
 })
 
+document.querySelector('#id_num').addEventListener('keydown', function(event){
+    if (event.keyCode === 13) {
+        input_num();
+        event.preventDefault();
+    }
+})
+
 </script>
 <script src="{% static 'race/js/lapmodalform.js'%}"></script>
 <script src="{% static 'js/downloadcsv.js'%}"></script>

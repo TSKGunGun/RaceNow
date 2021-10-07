@@ -194,7 +194,7 @@ class LapForm(forms.ModelForm):
     def clean_num(self):
         num = self.cleaned_data["num"]
 
-        if not( Entrant.objects.filter(pk=num).exists() ):
+        if not( Entrant.objects.filter(num=num).exists() ):
             raise ValidationError(
                 message="存在しないゼッケンNoです。"
             )

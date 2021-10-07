@@ -33,13 +33,21 @@ document.querySelector("#LapModal").addEventListener('show.bs.modal', function(e
 })
 
 num_selector.addEventListener('change', function(event){
+    input_num();
+})
+
+function input_num(){
     var ele = Array.from(document.querySelector('#list_num').getElementsByTagName("option")).find(element=>{
         return element.value == num_selector.value; })
     
     if ( ele != null ) { 
         get_entrant_info(ele.dataset.id, set_entrant_data);
+    } else {
+        var num = num_selector.value;
+        clean_entrant_data();
+         num_selector.value = num;
     }
-})
+}
 
 function set_entrant_data(ent_data){
     document.querySelector('#entrant_info_team_name').cells[1].innerText = ent_data["team_name"];
