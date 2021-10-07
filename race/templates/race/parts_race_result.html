@@ -1,12 +1,12 @@
-<div class="container-fluid">
+<div class="container-fluid p-0" >
     <table class="table table-striped table-hover table-ranking" id="result_data">
         <tr>
             <th hidden>ID</th>
-            <th class="text-center">順位</th>
-            <th class="text-center">ゼッケンNo</th>
-            <th>チーム名</th>
-            <th>ライダー</th>
-            <th class="text-center">周回数</th>
+            <th class="text-center text-nowrap">順位</th>
+            <th class="text-center text-nowrap">ゼッケンNo</th>
+            <th class="text-nowrap">チーム名</th>
+            <th class="text-nowrap">ライダー</th>
+            <th class="text-center text-nowrap">周回数</th>
             <th class="d-none d-md-table-cell">最終計測時間</th>
         </tr>
         {% for item in result %}
