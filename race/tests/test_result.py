@@ -2,8 +2,9 @@ import json
 from time import timezone
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls.base import reverse
 import pytz
-from race.models import Race, Lap, Entrant
+from race.models import Race, Lap, Entrant, RaceStatus
 from .factories import RaceFactory, EntrantFactory, Entrant_Member_Factory, Lap_Factory
 from account.tests.factories import UserFactory, OrganizerFactory
 from datetime import datetime, timedelta
@@ -352,3 +353,32 @@ class deleteLap_View_Test(TestCase):
         response=self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
+
+class RaceShowResult_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+
+    def test_access(self):
+        self.client.logout()
+        valids = [RaceStatus.RACE_STATUS_HOLD, RaceStatus.RACE_STATUS_END]
+        invalids = [RaceStatus.RACE_STATUS_DEFAULT, RaceStatus.RACE_STATUS_ENTRY, RaceStatus.RACE_STATUS_CANCEL]
+
+        for valid in valids:
+            with self.subTest(valid=valid):
+                self.race.status = RaceStatus.objects.get(pk=valid)
+                self.race.save()
+                response = self.client.get(reverse("show_result", kwargs={"pk": self.race.id}))
+                self.assertEqual(response.status_code, 200)
+                self.assertTemplateUsed(response, 'race/race_result.html')
+        
+        for invalid in invalids:
+            with self.subTest(invalid=invalid):
+                self.race.status = RaceStatus.objects.get(pk=invalid)
+                self.race.save()
+                response = self.client.get(reverse("show_result", kwargs={"pk": self.race.id}))
+                self.assertEqual(response.status_code, 200)
+                self.assertTemplateUsed(response, 'race/result_notshow.html')

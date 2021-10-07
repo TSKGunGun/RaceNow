@@ -19,7 +19,7 @@
     {% bootstrap_javascript %}
     <title>RaceNow|{% block title %}{% endblock %}</title>
 </head>
-<body class="h-100 v-stack" style="padding:55px 0" {% block bodyattribute%}{% endblock %}>
+<body class="h-100 {% block bodyclass %}{% endblock %}" style="padding:55px 0" {% block bodyattribute%}{% endblock %}>
     <div class="fixed-top">
         <nav class="navbar navbar-expand-md bg-dark navbar-dark">
             <div class="container-fluid">

@@ -326,4 +326,8 @@ def get_lap_info(entrant):
 
 @require_GET
 def showResult(request, pk):
-    return render(request, "race/race_result.html", get_context_resultinput(pk))
+    race = get_object_or_404(Race, pk=pk)
+    if race.status.id == RaceStatus.RACE_STATUS_HOLD or race.status.id == RaceStatus.RACE_STATUS_END :
+        return render(request, "race/race_result.html", get_context_resultinput(pk))
+    else :
+        return render(request, "race/result_notshow.html", get_context_resultinput(pk))

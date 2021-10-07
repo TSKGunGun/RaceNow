@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block title %}{{ object.name }} リザルトなし {% endblock %}
+{% block append_head %}
+<style>
+    body {
+        background-color: #555555;
+    }
+</style>
+{% endblock %}
+
+{% block fixed_top %}
+<div class="container-fluid text-light" style="background-color: crimson;">
+    <div class="p-1">
+        <span class="h5">{{ object.name }} リザルト</span>
+    </div>
+</div>
+{% endblock %}
+{% block contents %}
+<main style="margin-top: 40px;">
+    <div class="contaienr-fluid h-100 w-100 p-3">
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="text-light text-center">
+                <span style="font-size: 8rem;"><i class="bi bi-cloud-rain-heavy-fill"></i></span>
+    
+                <h1>レースが開始されていません。</h1>
+                <p>レースが開始されないとリザルトページにアクセスできません。</p>
+                <p>お手数ですがレース開始後に再度アクセスしてください。</p>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
