@@ -73,24 +73,7 @@
 {% endblock %}
 
 {% block footer %}
-<div class="fixed-bottom bg-dark p-2">
-    <div class="container-fluid">
-        <div class="text-light d-flex justify-content-center">
-            SNSでシェア
-            <div class="d-flex h-stack">
-                <div class="ms-3 mt-1">
-                    <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" style="background-color: #1DA1F2;" data-show-count="false"
-                    data-text="【RaceNow】{{ object.name }} レース結果をシェア!" data-url="{{ request.get_host }}{% url 'show_result' object.id %}">ツイート</a>
-                </div>
-                <div class="ms-2">
-                    <div class="fb-share-button" data-href="{{ request.get_host }}{% url 'show_result' object.id %}" data-layout="button" data-size="small">
-                        <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fracenow.pythonanywhere.com%2Frace%2F1%2Fshowresult&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">シェア</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>  
+{% include 'race/parts_race_footer.html'%}
 {% endblock %}
 
 {% block script %}
