@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from .models import Category, Lap, Race, RaceType, Entrant
 from place.models import Place
 from django.forms.widgets import Select
@@ -167,13 +168,28 @@ class AddEntrantForm(forms.ModelForm):
         model = Entrant
         fields = ('team_name', 'num')
 
+class ListTextWidget(forms.TextInput):
+    def __init__(self, data_list, name, *args, **kwargs):
+        super(ListTextWidget, self).__init__(*args, **kwargs)
+        self._name = name
+        self._list = data_list
+        self.attrs.update({'list':f'list_{self._name}' })
+    
+    def render(self, name, value, attrs=None, renderer=None) :
+        text_html = super(ListTextWidget, self).render(name, value, attrs=attrs)
+        data_list = f'<datalist id="list_{self._name}">'
+        for item in self._list:
+            data_list += f'<option value="{item["num"]}" data-id={item["id"]}>'
+        data_list += '</datalist>'
+
+        return mark_safe(text_html + data_list)
 
 class LapForm(forms.ModelForm):
-    num = forms.ChoiceField(label="ゼッケンNo")
+    num = forms.CharField(label="ゼッケンNo")
 
     def __init__(self, entrants=None, *args, **kwargs) :
-        self.base_fields["num"].choices = [('-1', '---')] + [ (entrant["id"], entrant["num"]) for entrant in entrants ]
         super().__init__(*args, **kwargs)
+        self.fields['num'].widget = ListTextWidget(data_list=entrants, name="num")
 
     def clean_num(self):
         num = self.cleaned_data["num"]

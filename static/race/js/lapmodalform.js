@@ -22,19 +22,22 @@ Array.from(resultTable.getElementsByTagName("tr")).forEach(element => {
 document.querySelector("#LapModal").addEventListener('show.bs.modal', function(event){
     clean_entrant_data();
     if(select_entId > 0) {
-        Array.from(num_selector.getElementsByTagName('option')).forEach(element=>{
-            if( element.value == select_entId ){
-                element.selected = true;
-            }
-        })
-        get_entrant_info(select_entId, set_entrant_data);
+        var ele = Array.from(document.querySelector('#list_num').getElementsByTagName("option")).find(element=>{
+            return element.dataset.id == select_entId; })
+        
+        if ( ele != null ) {
+            num_selector.value = ele.value
+            get_entrant_info(select_entId, set_entrant_data);
+        }
     }
 })
 
 num_selector.addEventListener('change', function(event){
-    var entrant_id = num_selector.selectedOptions[0].value;
-    if ( entrant_id > 0 ) { 
-        get_entrant_info(entrant_id, set_entrant_data);
+    var ele = Array.from(document.querySelector('#list_num').getElementsByTagName("option")).find(element=>{
+        return element.value == num_selector.value; })
+    
+    if ( ele != null ) { 
+        get_entrant_info(ele.dataset.id, set_entrant_data);
     }
 })
 
@@ -63,7 +66,7 @@ function set_entrant_data(ent_data){
 }
 
 function clean_entrant_data(){
-    num_selector.selectedIndex = 0;
+    num_selector.value = "";
     document.querySelector('#entrant_info_team_name').cells[1].innerText = ""
     document.querySelector('#entrant_info_team_member').cells[1].innerText = "";
     var lapTable = document.querySelector('#entrant_laps');
