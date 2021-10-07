@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load django_bootstrap5 %}
+{% load widget_tweaks %}
 {% load static %}
 
 {% block title %}{{ object.name }} リザルト入力 {% endblock %}
@@ -63,7 +63,14 @@
                         <small class="text-danger">ラップを複数削除したい場合、何回か実行してください。</small>
                     </div>
                     {% csrf_token %}
-                    {% bootstrap_form lap_entry_form %}
+                    <div class="mb-3">
+                        <label for="id_num">ゼッケンNo</label>
+                        {% render_field lap_entry_form.num placeholder="ゼッケンNo" class+="form-control" %}
+                        <div class="invalid-feedback">
+                            正しいゼッケンNoを入力してください。
+                        </div>
+                    </div>
+                    
                     <div class="card">
                     <span class="card-header h5">エントラント情報</span>
                     <div class="card-body">
@@ -140,6 +147,17 @@ document.querySelector('#id_num').addEventListener('keydown', function(event){
     if (event.keyCode === 13) {
         input_num();
         event.preventDefault();
+    }
+})
+
+document.querySelector('#lapform_submit_btn').addEventListener("click", function(event){
+    var ele = Array.from(document.querySelector('#list_num').getElementsByTagName("option")).find(element=>{
+        return element.value == num_selector.value; })
+    
+    if ( num_selector.value === "" || ele == null ){
+        event.preventDefault();
+        num_selector.classList.add("is-invalid");
+        
     }
 })
 

@@ -75,6 +75,7 @@ function set_entrant_data(ent_data){
 
 function clean_entrant_data(){
     num_selector.value = "";
+    num_selector.classList.remove("is-invalid");
     document.querySelector('#entrant_info_team_name').cells[1].innerText = ""
     document.querySelector('#entrant_info_team_member').cells[1].innerText = "";
     var lapTable = document.querySelector('#entrant_laps');
