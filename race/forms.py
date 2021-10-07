@@ -182,9 +182,9 @@ class LapForm(forms.ModelForm):
             raise ValidationError(
                 message="存在しないゼッケンNoです。"
             )
-        
-        return num
 
+        return num
+    
     class Meta:
         model = Lap
         fields = ("num",)

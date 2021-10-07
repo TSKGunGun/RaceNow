@@ -169,6 +169,7 @@ class ResutInput_View_Test(TestCase):
         params={
             "num" : self.ent1.id
         }
+
         response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
         self.assertTrue(Lap.objects.exists())
         self.assertEqual(response.status_code, 302)
@@ -306,6 +307,20 @@ class deleteLap_View_Test(TestCase):
         self.assertTrue(ent.lap_set.filter(pk=l1.id).exists())
         self.assertFalse(ent.lap_set.filter(pk=l2.id).exists())
         self.assertTrue(ent.lap_set.filter(pk=l3.id).exists())
+    
+    def test_deletelap_nolap(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        params={
+            "num" : self.ent1.id
+        }
+
+        response = self.client.post(f"/race/{self.race.id}/inputresult/deletelap", params)
+
+        self.assertEqual(response.status_code, 302)
+        ent = Entrant.objects.get(pk=self.ent1.id)
+        self.assertEqual(ent.lap_set.count(), 0)
 
     def test_deletelap_notmember(self):
         self.client.logout()

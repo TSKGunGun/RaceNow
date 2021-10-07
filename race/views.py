@@ -273,6 +273,9 @@ def deleteLap(request, pk):
 
     if form.is_valid():
         entrant = get_object_or_404(Entrant, pk=request.POST["num"])    
+        if not( entrant.lap_set.all().exists() ):
+            return redirect('input_result', pk=race.id)
+            
         lap = entrant.lap_set.order_by('-created_at').first()
         lap.delete()
 
