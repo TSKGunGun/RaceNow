@@ -225,6 +225,18 @@ def fixedRegulation(request, pk):
 
 @require_POST
 @login_required
+def finishRace(request, pk):
+    race = get_object_or_404(Race, pk=pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
+
+    race.status = RaceStatus.objects.get(pk=RaceStatus.RACE_STATUS_END)
+    race.save()
+
+    return redirect('race_detail', race.id)
+
+@require_POST
+@login_required
 def startRace(request, pk):
     race = get_object_or_404(Race, pk=pk)
     if not race.is_member(request.user) :

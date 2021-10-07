@@ -487,3 +487,57 @@ class fiexedreguration_View_Test(TestCase):
         race = Race.objects.get(pk=self.race.id)
         self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
         self.assertEqual(response.status_code, 403)
+
+
+class finishRace_View_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+        
+        self.user = get_user_model().objects.first()
+
+    def test_changeRaceStatus(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        self.assertEqual(self.race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+
+        response = self.client.post(f"/race/{self.race.id}/finishrace")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_END)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response=response, expected_url=f"/race/{self.race.id}/detail", status_code=302, target_status_code=200)
+
+    def test_getrequest(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        response = self.client.get(f"/race/{self.race.id}/finishrace")
+
+        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 405)
+    
+    def test_notlogin(self):
+        self.client.logout()
+        self.assertEqual(self.race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+
+        response = self.client.post(f"/race/{self.race.id}/finishrace")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+        self.assertEqual(response.status_code, 302)
+    
+    def test_notmember(self):
+        self.client.logout
+        other_usr = UserFactory()
+        self.client.force_login(other_usr)
+        response = self.client.post(f"/race/{self.race.id}/finishrace")
+
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+        self.assertEqual(response.status_code, 403)
+
