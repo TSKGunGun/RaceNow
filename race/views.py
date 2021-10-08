@@ -199,8 +199,9 @@ class AddEntrantView(TemplateView):
             return redirect('race_detail', race.id)
         
         #memberは関連Inputがないのでフラッシュメッセージで出力
-        for err in form.errors['members'] :
-            messages.error(request, err)
+        if "members" in form.errors.keys():
+            for err in form.errors['members'] :
+                messages.error(request, err)
 
         content = {
             "member_max": race.team_member_count_max,
