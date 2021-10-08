@@ -1,7 +1,7 @@
 from race.models import Race
 from django.urls import path
 from .views import RaceDetailView, RaceIndexView, RegulationSetupView, \
-                  AddEntrantView, deleteLap,startRace,inputResult,addLap, get_entrant_info, deleteLap, showResult, fixedRegulation, finishRace
+                  AddEntrantView, deleteLap,startRace,inputResult,addLap, get_entrant_info, deleteLap, showResult, fixedRegulation, finishRace,setDNF
 
 urlpatterns=[
     path('', RaceIndexView.as_view(), name="race_index"),
@@ -15,6 +15,7 @@ urlpatterns=[
     path('<int:pk>/showresult', showResult, name="show_result" ),
     path('<int:pk>/inputresult/addlap', addLap, name="add_lap" ),
     path('<int:pk>/inputresult/deletelap', deleteLap, name="delete_lap" ),
+    path('<int:pk>/inputresult/setDNF', setDNF, name="race_setdnf" ),
     
     #APIs
     path('entrants/<int:pk>/getinfo', get_entrant_info)
