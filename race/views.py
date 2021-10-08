@@ -198,11 +198,6 @@ class AddEntrantView(TemplateView):
 
             return redirect('race_detail', race.id)
         
-        #memberは関連Inputがないのでフラッシュメッセージで出力
-        if "members" in form.errors.keys():
-            for err in form.errors['members'] :
-                messages.error(request, err)
-
         content = {
             "member_max": race.team_member_count_max,
             "member_min": race.team_member_count_min,
@@ -210,6 +205,14 @@ class AddEntrantView(TemplateView):
             "object" : race
         }
 
+        #memberは関連InputがHiddenなので一旦配列に格納しておく
+        if "members" in form.errors.keys():
+            members_error = []
+            for err in form.errors['members'] :
+                members_error.append(err)
+
+            content["members_error"] = members_error
+        
         return render(request, 'race/entrant_add.html', content)
 
 @require_POST
