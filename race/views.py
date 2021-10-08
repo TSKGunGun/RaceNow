@@ -14,6 +14,7 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapForm
 from django.db import transaction
+from datetime import datetime
 import json
 import pytz
 
@@ -272,12 +273,24 @@ def addLap(request, pk):
     form = get_lap_form(race.id, data=request.POST, instance=race)
     if form.is_valid():
         entrant = get_object_or_404(Entrant, num=request.POST["num"])    
+        
+        laptime = None
+        if entrant.lap_set.all().exists() :
+            laptime = getLaptime(entrant.lap_set.order_by('created_at').reverse().first().created_at)
+        else:
+            laptime = getLaptime(entrant.race.start_at)
+        
         Lap.objects.create(
-            entrant = entrant
+            entrant = entrant,
+            laptime = laptime
         )
         return redirect('input_result', pk=race.id)
 
     return redirect('input_result', pk=race.id)
+
+def getLaptime(lastTime):
+    td = abs(timezone.now() - lastTime)
+    return (datetime(1,1,1,0,0,0) + td).time()
 
 @require_POST
 @login_required

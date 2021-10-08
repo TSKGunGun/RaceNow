@@ -9,7 +9,7 @@ import pytz
 from race.models import Race, Lap, Entrant, RaceStatus
 from .factories import RaceFactory, EntrantFactory, Entrant_Member_Factory, Lap_Factory
 from account.tests.factories import UserFactory, OrganizerFactory
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,time
 from django.utils import timezone
 from unittest.mock import patch
 
@@ -166,22 +166,53 @@ class ResutInput_View_Test(TestCase):
 
     @patch('django.utils.timezone.now', return_value=datetime(2021, 1, 1, 1, 1 ,1, tzinfo=timezone.utc))
     def test_addlap_view_true(self, _mock_now):
+        startdatetime = timezone.now()
         self.client.logout()
         self.client.force_login(self.user)
+        self.race.start_at = timezone.now()
+        self.race.save()
 
         params={
             "num" : self.ent1.num
         }
 
+        _mock_now.return_value = startdatetime + timedelta(seconds=1)
         response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
         self.assertTrue(Lap.objects.exists())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Lap.objects.first().entrant.id, self.ent1.id)
-        self.assertEqual(Lap.objects.first().created_at, datetime(2021, 1, 1, 1, 1, 1, tzinfo=timezone.utc))
+        self.assertEqual(Lap.objects.first().created_at, datetime(2021, 1, 1, 1, 1, 2, tzinfo=timezone.utc))
+        self.assertEqual(Lap.objects.first().laptime, time(0,0,1))
+
+        _mock_now.return_value = startdatetime + timedelta(seconds=2)
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertEqual(Lap.objects.count(), 2)
+        self.assertEqual(Lap.objects.all()[1].created_at, datetime(2021, 1, 1, 1, 1, 3, tzinfo=timezone.utc))
+        self.assertEqual(Lap.objects.all()[1].laptime, time(0,0,1))
+
+        _mock_now.return_value = startdatetime + timedelta(seconds=3)
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertEqual(Lap.objects.count(), 3)
+        self.assertEqual(Lap.objects.all()[2].created_at, datetime(2021, 1, 1, 1, 1, 4, tzinfo=timezone.utc))
+        self.assertEqual(Lap.objects.all()[2].laptime, time(0,0,1))
+
+        _mock_now.return_value = startdatetime + timedelta(minutes=1, seconds=2)
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertEqual(Lap.objects.count(), 4)
+        self.assertEqual(Lap.objects.all()[3].created_at, datetime(2021, 1, 1, 1, 2, 3, tzinfo=timezone.utc))
+        self.assertEqual(Lap.objects.all()[3].laptime, time(0,0,59))
+
+        _mock_now.return_value = startdatetime + timedelta(minutes=2, seconds=2)
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertEqual(Lap.objects.count(), 5)
+        self.assertEqual(Lap.objects.all()[4].created_at, datetime(2021, 1, 1, 1, 3, 3, tzinfo=timezone.utc))
+        self.assertEqual(Lap.objects.all()[4].laptime, time(0,1,00))
     
     def test_addlap_num_id(self):
-        ent1 = EntrantFactory()
-        ent2 = EntrantFactory()
+        ent1 = EntrantFactory(race=self.race)
+        ent2 = EntrantFactory(race=self.race)
+        self.race.start_at = timezone.now()
+        self.race.save()
 
         ent1.num = ent2.id
         ent1.save()
