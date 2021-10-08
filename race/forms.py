@@ -187,9 +187,9 @@ class ListTextWidget(forms.TextInput):
 class LapForm(forms.ModelForm):
     num = forms.CharField(label="ゼッケンNo")
 
-    def __init__(self, entrants=None, *args, **kwargs) :
+    def __init__(self, entrants=None, num_name="num", *args, **kwargs) :
         super().__init__(*args, **kwargs)
-        self.fields['num'].widget = ListTextWidget(data_list=entrants, name="num")
+        self.fields['num'].widget = ListTextWidget(data_list=entrants, name=num_name)
 
     def clean_num(self):
         num = self.cleaned_data["num"]

@@ -299,7 +299,9 @@ def get_context_resultinput(raceid):
     context = {
         "object":race,
         "result":Race.objects.get_result(race.id),
-        "lap_entry_form" : get_lap_form(race.id)
+        "lap_entry_form" : get_lap_form(race.id),
+        "set_dnf_form" : get_setdnf_form(race.id),
+        "unset_dnf_form" : get_unsetdnf_form(race.id),
     }
 
     return context
@@ -312,6 +314,26 @@ def get_lap_form(raceid, *args, **kwargs):
         nums.append({"id": entrant.id, "num":entrant.num})
 
     return LapForm(entrants=nums, *args, **kwargs)
+
+
+def get_setdnf_form(raceid, *args, **kwargs):
+    race = get_object_or_404(Race, pk=raceid)
+
+    nums = []
+    for entrant in race.entrant_set.filter(is_dnf=False).all():
+        nums.append({"id": entrant.id, "num":entrant.num})
+
+    return LapForm(entrants=nums, num_name="setdnf_num", *args, **kwargs)
+
+
+def get_unsetdnf_form(raceid, *args, **kwargs):
+    race = get_object_or_404(Race, pk=raceid)
+
+    nums = []
+    for entrant in race.entrant_set.filter(is_dnf=True).all():
+        nums.append({"id": entrant.id, "num":entrant.num})
+
+    return LapForm(entrants=nums, num_name="unsetdnf_num", *args, **kwargs)
 
 @require_GET
 def get_entrant_info(request, *args, **kwargs):

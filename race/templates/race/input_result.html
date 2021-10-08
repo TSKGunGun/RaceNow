@@ -33,6 +33,12 @@
                     </a>   
                 </li>
                 <li class="nav-item ms-2 mb-1">
+                    <a role="button" class="nav-link btn btn-warning text-light" data-bs-toggle="modal" data-bs-target="#settingDNFModal" id="btn_setDNF" >
+                        <i class="bi bi-person-x-fill"></i>
+                        DNF設定
+                    </a>
+                </li>
+                <li class="nav-item ms-2 mb-1">
                     <a role="button" class="nav-link btn btn-info text-light" href="javascript:void(0)", onclick="download_CSV(this, document.querySelector('#result_data'), 'result.csv');" >
                         <i class="bi bi-file-earmark-arrow-down"></i>
                         CSVダウンロード
@@ -102,6 +108,70 @@
         </div>
     </div>
 </div>
+
+<!--SetDNFModal -->
+<div class="modal fade" id="settingDNFModal" tabindex="-1" aria-labelledby="settingDNFModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="settingDNFModalLabel">DNF設定</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <ul class="nav nav-tabs mt-3" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="setdnf-tab" data-bs-toggle="tab" href="#setDNF-pane" role="tab" aria-controls="home" aria-selected="true">
+                        DNS設定追加
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="unsetdnf-tab" data-bs-toggle="tab" href="#unsetDNF-pane" role="tab" aria-controls="profile" aria-selected="false">
+                        DNF設定解除
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="setDNF-pane" role="tabpanel" aria-labelledby="home-tab">
+                    <form action="{% url 'race_setdnf' object.id %}" method="POST" >
+                        <div class="modal-body">
+                            <p class="text-danger">指定したゼッケンNoのエントラントをDNFに設定します。</p>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_num_setDNF">ゼッケンNo</label>
+                                {% render_field set_dnf_form.num placeholder="ゼッケンNo" class+="form-control" id="id_num_setDNF" %}
+                                <div class="invalid-feedback">
+                                    ゼッケンNoが正しくないか、既にDNFに設定しているエントラントを指定しています。
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                                <button type="submit" class="btn btn-primary" id="setDNF_submit">DNS設定</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane fade" id="unsetDNF-pane" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="modal-body">
+                        <form action="{% url 'race_unsetdnf' object.id %}" method="POST" >
+                            <p class="text-danger">指定したゼッケンNoのエントラントのDNF設定を解除します。</p>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_num_setDNF">ゼッケンNo</label>
+                                {% render_field unset_dnf_form.num placeholder="ゼッケンNo" class+="form-control" id="id_num_unsetDNF" %}
+                                <div class="invalid-feedback">
+                                    ゼッケンNoが正しくないか、DNFに設定されていないエントラントを指定しています。
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                                <button type="submit" class="btn btn-primary" id=unsetDNF_submit>DNS設定解除</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block footer %}
@@ -127,22 +197,47 @@ document.querySelector('#btn_lapdelete').addEventListener('click', function(even
 })
 
 document.querySelector('#id_num').addEventListener('keydown', function(event){
+    CancelEnter(event)
+})
+
+document.querySelector('#id_num_setDNF').addEventListener('keydown', function(event){
+    cancelEnter(event)
+})
+
+document.querySelector('#id_num_unsetDNF').addEventListener('keydown', function(event){
+    cancelEnter(event)
+})
+
+function cancelEnter(event){
     if (event.keyCode === 13) {
         input_num();
         event.preventDefault();
     }
-})
+}
 
 document.querySelector('#lapform_submit_btn').addEventListener("click", function(event){
-    var ele = Array.from(document.querySelector('#list_num').getElementsByTagName("option")).find(element=>{
-        return element.value == num_selector.value; })
+    numValidation(num_selector, document.querySelector('#list_num'));
+})
+
+document.querySelector('#setDNF_submit').addEventListener("click", function(event){
+    numValidation(document.querySelector('#id_num_setDNF'), document.querySelector( '#list_setdnf_num' ) );
+})
+
+document.querySelector('#unsetDNF_submit').addEventListener("click", function(event){
+    numValidation(document.querySelector('#id_num_unsetDNF'), document.querySelector( '#list_unsetdnf_num' ) );
+})
+
+
+function numValidation(numElement, listElement ){
+    var ele = Array.from(listElement.getElementsByTagName("option")).find(element=>{
+        return element.value == numElement.value; })
     
-    if ( num_selector.value === "" || ele == null ){
+    if ( numElement.value === "" || ele == null ){
         event.preventDefault();
-        num_selector.classList.add("is-invalid");
+        numElement.classList.add("is-invalid");
         
     }
-})
+}
 
 </script>
 <script src="{% static 'race/js/lapmodalform.js'%}"></script>
