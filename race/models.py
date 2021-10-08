@@ -70,6 +70,8 @@ class Race(models.Model):
     created_at = models.DateField(verbose_name="作成日", auto_now_add=True)
     updated_at = models.DateField(verbose_name="更新日", auto_now=True)
 
+    start_at = models.DateTimeField(verbose_name="レース開始日時", null=True)
+
     def is_member(self, user):
         return self.organizer.is_member(user)
 

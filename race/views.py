@@ -11,6 +11,7 @@ from account.models import Organizer
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapForm
 from django.db import transaction
 import json
@@ -247,6 +248,7 @@ def startRace(request, pk):
         raise PermissionDenied
 
     race.status = RaceStatus.objects.get(pk=RaceStatus.RACE_STATUS_HOLD)
+    race.start_at = timezone.now()
     race.save()
 
     return redirect('race_detail', race.id)

@@ -1,15 +1,15 @@
 from django.core.exceptions import ValidationError
-from django.utils import timezone
-from datetime import timedelta
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from account.models import Organizer
 from place.models import Place
 from race.models import Race, RaceStatus, RaceType
-import datetime
 from race.forms import EventDateValidator
 from .factories import RaceFactory,EntrantFactory,Lap_Factory,Entrant_Member_Factory
 from account.tests.factories import UserFactory, OrganizerFactory
+from django.utils import timezone
+from datetime import datetime, timedelta, tzinfo, date
+from unittest.mock import patch
 
 class Race_Model_Test(TestCase):
     fixtures = ['race_default.json']
@@ -154,7 +154,7 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
-            "event_date" : datetime.date.today().strftime("%Y-%m-%d"),
+            "event_date" : date.today().strftime("%Y-%m-%d"),
             "url" : "",
             "note" : ""
         }
@@ -212,7 +212,7 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
-            "event_date" : (datetime.date.today()+timedelta(days=1)).strftime("%Y-%m-%d"),
+            "event_date" : (date.today()+timedelta(days=1)).strftime("%Y-%m-%d"),
             "url" : "",
             "note" : ""
         }
@@ -232,7 +232,7 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
-            "event_date" : (datetime.date.today()+timedelta(days=1)).strftime("%Y/%m/%d"),
+            "event_date" : (date.today()+timedelta(days=1)).strftime("%Y/%m/%d"),
             "url" : "",
             "note" : ""
         }
@@ -252,7 +252,7 @@ class Race_CreateView_Test(TestCase):
             "place" : self.place.id,
             "category" : 1,
             "racetype" : 1,
-            "event_date" : datetime.date.today().strftime("%Y-%m-%d"),
+            "event_date" : date.today().strftime("%Y-%m-%d"),
             "url" : "",
             "note" : "SampleNote"
         }
@@ -313,16 +313,21 @@ class Race_StartTest(TestCase):
             url = ""
         )
 
-    def test_changeRaceStatus(self):
+    @patch('django.utils.timezone.now', return_value=datetime(2021, 1, 1, 1, 1 ,1, tzinfo=timezone.utc))
+    def test_changeRaceStatus(self, _mock_now):
+        startdatetime = datetime(2021, 1, 1, 1, 1 ,1, tzinfo=timezone.utc)
+        
         self.client.logout()
         self.client.force_login(self.user)
         
         self.assertEqual(self.race.status.id, RaceStatus.RACE_STATUS_DEFAULT)
+        self.assertEqual(self.race.start_at, None )
 
         response = self.client.post(f"/race/{self.race.id}/startrace")
 
         race = Race.objects.get(pk=self.race.id)
         self.assertEqual(race.status.id, RaceStatus.RACE_STATUS_HOLD)
+        self.assertEqual(race.start_at,  startdatetime)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response=response, expected_url=f"/race/{self.race.id}/detail", status_code=302, target_status_code=200)
 
