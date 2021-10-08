@@ -3,6 +3,7 @@
         <tr>
             <th hidden>ID</th>
             <th class="text-center text-nowrap">順位</th>
+            <th></th>
             <th class="text-center text-nowrap">ゼッケンNo</th>
             <th class="text-nowrap">チーム名</th>
             <th class="text-nowrap">ライダー</th>
@@ -13,6 +14,13 @@
         <tr>
             <td hidden>{{ item.id }}</td>
             <td class="text-center h4">{{ forloop.counter }}</td>
+            {% if item.is_dnf %}
+            <td class="bg-danger text-light text-center">
+                DNF
+            </td>
+            {%else%}
+            <td></td>
+            {% endif %}
             <td class="text-center">{{ item.num }}</td>
             <td>{{ item.team_name }}</td>
             <td>{% for member in item.entrant_member_set.all %}{{ member.name }}{% if not forloop.last %} / {% endif %} {% endfor %}</td>
