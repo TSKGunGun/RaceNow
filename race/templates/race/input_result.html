@@ -22,13 +22,13 @@
             <ul class="navbar-nav me-auto">
                 <li class="nav-item ms-2 mb-1">
                     <a role="button" class="nav-link text-light btn btn-primary" data-bs-toggle="modal" data-bs-target="#LapModal" id="btn_lapadd" >
-                        <i class="bi bi-speedometer2"></i>
+                        <i class="bi bi-plus-circle"></i>
                         ラップ追加
                     </a>   
                 </li>
                 <li class="nav-item ms-2 mb-1">
                     <a role="button" class="nav-link btn btn-danger text-light" data-bs-toggle="modal" data-bs-target="#LapModal" id="btn_lapdelete" >
-                        <i class="bi bi-x-octagon-fill"></i>
+                        <i class="bi bi-dash-circle"></i>
                         ラップ削除
                     </a>   
                 </li>
@@ -64,6 +64,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div id="form_explanation_add">
+                        <span class="text-danger">指定ゼッケンNoのエントラントにラップを追加します。</span><br>
+                        <small class="text-danger">ラップ追加を行った順番で順位を決定しますので、同じエントラントに連続してラップを追加すると正しい順位が表示できなくなります。</small>
+                    </div>
                     <div id="form_explanation_delete">
                         <span class="text-danger">最後のラップを削除します。</span><br>
                         <small class="text-danger">ラップを複数削除したい場合、何回か実行してください。</small>
@@ -182,6 +186,7 @@
 <script>
 document.querySelector('#btn_lapadd').addEventListener('click', function(event){
     lapmodal.querySelector('#LapModalLabel').innerText = "ラップ追加";
+    lapmodal.querySelector('#form_explanation_add').style.display = "block";
     lapmodal.querySelector('#form_explanation_delete').style.display = "none";
     
     lapmodal.querySelector('#lapform_head').setAttribute("action", "{% url 'add_lap' object.id %}")
@@ -190,6 +195,7 @@ document.querySelector('#btn_lapadd').addEventListener('click', function(event){
 
 document.querySelector('#btn_lapdelete').addEventListener('click', function(event){
     lapmodal.querySelector('#LapModalLabel').innerText = "ラップ削除";
+    lapmodal.querySelector('#form_explanation_add').style.display = "none";
     lapmodal.querySelector('#form_explanation_delete').style.display = "block";
 
     lapmodal.querySelector('#lapform_head').setAttribute("action", "{% url 'delete_lap' object.id %}")
