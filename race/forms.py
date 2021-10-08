@@ -134,6 +134,15 @@ class AddEntrantForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.race = race
 
+    def clean_num(self):
+        num = self.cleaned_data["num"]
+        if self.race.entrant_set.filter(num=num).exists():
+            raise ValidationError(
+                message=f"入力したゼッケンNo: {num} は既に使用されています。"
+            )
+
+        return num
+
     def clean_members(self):
         membersjson = self.cleaned_data["members"]
         if membersjson == "" :

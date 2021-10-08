@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from race.models import NumValidator, Race
 from race.forms import AddEntrantForm
-from .factories import RaceFactory
+from .factories import EntrantFactory, RaceFactory
 from account.tests.factories import UserFactory, OrganizerFactory
 from django.urls import reverse
 import json
@@ -97,6 +97,19 @@ class AddEntrantForm_Input_Test(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("num", form.errors)
 
+    def test_post_samenum(self):
+        ent1 = EntrantFactory(race = self.race)
+
+        params = {
+            "team_name" : "Test",
+            "num" :  ent1.num,
+            "members" : json.dumps( { "0" : { "name" : "test"}})
+        }
+    
+        form = AddEntrantForm(race=self.race, data=params)
+        self.assertFalse(form.is_valid())
+        self.assertIn('num', form.errors)
+        self.assertEqual(form.errors["num"], [f"入力したゼッケンNo: {params['num']} は既に使用されています。"])
 
 class Entrant_Num_Validation_Test(TestCase):
     def atest_validation(self):
@@ -190,5 +203,3 @@ class View_AddEntrant_Test(TestCase):
 
         self.assertNotEqual(response.status_code, 302)
         self.assertFalse(Race.objects.get(pk=self.race.id).entrant_set.all().exists())
-
-
