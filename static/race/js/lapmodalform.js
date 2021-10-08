@@ -69,6 +69,7 @@ function set_entrant_data(ent_data){
         var countcell = addRow.insertCell()
         countcell.classList.add("text-center")
         countcell.appendChild(document.createTextNode(key));
+        addRow.insertCell().appendChild(document.createTextNode(lap["lap_time"]));
         addRow.insertCell().appendChild(document.createTextNode(lap["input_time"]));
     })
 }

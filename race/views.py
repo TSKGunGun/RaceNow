@@ -371,7 +371,10 @@ def get_lap_info(entrant):
     count = 1
     tz = pytz.timezone('Asia/Tokyo')
     for lap in entrant.lap_set.all().order_by("created_at"):
-        laps[str(count)] = { "input_time" : lap.created_at.astimezone(tz).strftime("%Y/%m/%d %H:%M:%S") }
+        laps[str(count)] = { 
+            "input_time" : lap.created_at.astimezone(tz).strftime("%Y/%m/%d %H:%M:%S"), 
+            "lap_time" : lap.laptime.strftime("%H:%M:%S") 
+        }
         count += 1
     
     return laps
