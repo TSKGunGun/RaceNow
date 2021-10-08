@@ -360,3 +360,21 @@ def setDNF(request, pk):
         return redirect('input_result', pk=race.id)
 
     return redirect('input_result', pk=race.id)
+
+@require_POST
+@login_required
+def unsetDNF(request, pk):
+    race = get_object_or_404(Race, pk=pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
+    
+    form = get_lap_form(race.id, data=request.POST, instance=race)
+
+    if form.is_valid():
+        entrant = get_object_or_404(Entrant, num=request.POST["num"])    
+        entrant.is_dnf = False
+        entrant.save()    
+        
+        return redirect('input_result', pk=race.id)
+
+    return redirect('input_result', pk=race.id)

@@ -533,3 +533,72 @@ class SetDNF_View_Test(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertFalse(Entrant.objects.get(pk=self.ent1.id).is_dnf)
 
+class UnSetDNF_View_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+        self.ent1 = EntrantFactory(race=self.race)
+        self.ent2 = EntrantFactory(race=self.race)
+
+    def test_unsetDNF_view_access_get(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        self.ent1.is_dnf = True
+        self.ent1.save()
+
+        params = {
+            "num" : self.ent1.num
+        }
+
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+        response = self.client.get(reverse('race_unsetdnf', kwargs={"pk":self.race.id}), params)
+        self.assertNotEqual(response.status_code, 200)
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+
+    def test_setDNF_view_access_post(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        self.ent1.is_dnf = True
+        self.ent1.save()
+
+        params = {
+            "num" : self.ent1.num
+        }
+
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+        response = self.client.post(reverse('race_unsetdnf', kwargs={"pk":self.race.id}), params)
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+
+    def test_setDNF_view_access_notlogin(self):
+        self.client.logout()
+        self.ent1.is_dnf = True
+        self.ent1.save()
+
+        params = {
+            "num" : self.ent1.num
+        }
+
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+        response = self.client.post(reverse('race_unsetdnf', kwargs={"pk":self.race.id}), params)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+
+    def test_setDNF_view_access_notmember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+        self.ent1.is_dnf = True
+        self.ent1.save()
+
+        params = {
+            "num" : self.ent1.num
+        }
+
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+        response = self.client.post(reverse('race_unsetdnf', kwargs={"pk":self.race.id}), params)
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+
