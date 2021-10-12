@@ -272,7 +272,7 @@ def addLap(request, pk):
     
     form = get_lap_form(race.id, data=request.POST, instance=race)
     if form.is_valid():
-        entrant = get_object_or_404(Entrant, num=request.POST["num"])    
+        entrant = get_object_or_404(Entrant, race=race, num=request.POST["num"])    
         
         laptime = None
         if entrant.lap_set.all().exists() :
@@ -302,7 +302,7 @@ def deleteLap(request, pk):
     form = get_lap_form(race.id, data=request.POST, instance=race)
 
     if form.is_valid():
-        entrant = get_object_or_404(Entrant, num=request.POST["num"])    
+        entrant = get_object_or_404(Entrant, race=race, num=request.POST["num"])    
         if not( entrant.lap_set.all().exists() ):
             return redirect('input_result', pk=race.id)
             
@@ -397,7 +397,7 @@ def setDNF(request, pk):
     form = get_lap_form(race.id, data=request.POST, instance=race)
 
     if form.is_valid():
-        entrant = get_object_or_404(Entrant, num=request.POST["num"])    
+        entrant = get_object_or_404(Entrant, race=race, num=request.POST["num"])    
         entrant.is_dnf = True
         entrant.save()    
         
@@ -415,7 +415,7 @@ def unsetDNF(request, pk):
     form = get_lap_form(race.id, data=request.POST, instance=race)
 
     if form.is_valid():
-        entrant = get_object_or_404(Entrant, num=request.POST["num"])    
+        entrant = get_object_or_404(Entrant, race=race, num=request.POST["num"])    
         entrant.is_dnf = False
         entrant.save()    
         

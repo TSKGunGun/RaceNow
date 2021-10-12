@@ -1,8 +1,7 @@
-import account
 import factory
 from factory import fuzzy
 from race.models import Race, Entrant, Entrant_Member, RaceType, Category, Lap
-import string
+from django.utils import timezone
 from datetime import datetime, timedelta
 from account.tests.factories import OrganizerFactory
 from place.tests.factories import PlaceFactory
@@ -31,6 +30,7 @@ class RaceFactory(factory.django.DjangoModelFactory):
     is_teamrace = True
     team_member_count_min = 1
     team_member_count_max = 1
+    start_at = timezone.now()
 
     class Meta:
         model = Race

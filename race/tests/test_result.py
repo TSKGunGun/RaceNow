@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls.base import reverse
 from django.views.decorators.http import require_POST
 import pytz
+from account.models import Organizer
 from race.models import Race, Lap, Entrant, RaceStatus
 from .factories import RaceFactory, EntrantFactory, Entrant_Member_Factory, Lap_Factory
 from account.tests.factories import UserFactory, OrganizerFactory
@@ -152,7 +153,7 @@ class Race_Model_Test(TestCase):
         for item in result:
             print(f"No:{item.num} Laps:{item.lapcount} LastTime:{item.lasttime}")
 
-class ResutInput_View_Test(TestCase):
+class ResutInput_AddLap_Test(TestCase):
     fixtures = ['race_default.json']
 
     def setUp(self):
@@ -281,6 +282,22 @@ class ResutInput_View_Test(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("input_result", kwargs={"pk":self.race.id}))
+
+    def test_addlap_otherrace_sameNum(self):
+        race2 = RaceFactory()
+        EntrantFactory(race=race2, num=self.ent1.num)
+
+        self.client.logout
+        self.client.force_login(self.user)
+
+        params = {
+            "num" : self.ent1.num
+        }
+
+        self.assertFalse(Entrant.objects.get(pk=self.ent1.id).lap_set.all().exists() )
+        response = self.client.post(f"/race/{self.race.id}/inputresult/addlap", data=params)
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).lap_set.all().exists() )
+
 
 class GetEntrantInfo_Test(TestCase):
     fixtures = ['race_default.json']
@@ -432,8 +449,8 @@ class deleteLap_View_Test(TestCase):
         self.assertEqual(Entrant.objects.get(pk=self.ent1.id).lap_set.count(), 1)
 
     def test_deletelap_num_id(self):
-        ent1 = EntrantFactory()
-        ent2 = EntrantFactory()
+        ent1 = EntrantFactory(race=self.race)
+        ent2 = EntrantFactory(race=self.race)
 
         ent1.num = ent2.id
         ent1.save()
@@ -462,7 +479,7 @@ class deleteLap_View_Test(TestCase):
         self.assertFalse(Entrant.objects.get(pk=ent1.id).lap_set.all().exists())
         self.assertFalse(Entrant.objects.get(pk=ent2.id).lap_set.all().exists())
 
-    def test_addlap_view_ngNum(self):
+    def test_deletelap_view_ngNum(self):
         self.client.logout
         self.client.force_login(self.user)
 
@@ -477,6 +494,23 @@ class deleteLap_View_Test(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("input_result", kwargs={"pk":self.race.id}))
+
+    def test_deletelap_otherrace_sameNum(self):
+        race2 = RaceFactory()
+        o_ent1 = EntrantFactory(race=race2, num=self.ent1.num)
+        Lap_Factory(entrant=self.ent1)
+        Lap_Factory(entrant=o_ent1)
+
+        self.client.logout
+        self.client.force_login(self.user)
+
+        params = {
+            "num" : self.ent1.num
+        }
+
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).lap_set.all().exists() )
+        response = self.client.post(f"/race/{self.race.id}/inputresult/deletelap", data=params)
+        self.assertFalse(Entrant.objects.get(pk=self.ent1.id).lap_set.all().exists() )
 
 class RaceShowResult_Test(TestCase):
     fixtures = ['race_default.json']
@@ -563,6 +597,22 @@ class SetDNF_View_Test(TestCase):
         response = self.client.post(reverse('race_setdnf', kwargs={"pk":self.race.id}), params)
         self.assertEqual(response.status_code, 403)
         self.assertFalse(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+    
+    def test_setDNF_otherrace_sameNum(self):
+        race2 = RaceFactory()
+        o_ent1 = EntrantFactory(race=race2, num=self.ent1.num)
+
+        self.client.logout
+        self.client.force_login(self.user)
+
+        params = {
+            "num" : self.ent1.num
+        }
+
+        self.assertFalse(Entrant.objects.get(pk=self.ent1.id).is_dnf )
+        response = self.client.post(reverse('race_setdnf', kwargs={"pk":self.race.id}), params)
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+        self.assertFalse(Entrant.objects.get(pk=o_ent1.id).is_dnf )
 
 class UnSetDNF_View_Test(TestCase):
     fixtures = ['race_default.json']
@@ -633,3 +683,23 @@ class UnSetDNF_View_Test(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf)
 
+    def test_unsetDNF_otherrace_sameNum(self):
+        self.ent1.is_dnf = True
+        self.ent1.save()
+
+        race2 = RaceFactory()
+        o_ent1 = EntrantFactory(race=race2, num=self.ent1.num)
+        o_ent1.is_dnf = True
+        o_ent1.save()
+
+        self.client.logout
+        self.client.force_login(self.user)
+
+        params = {
+            "num" : self.ent1.num
+        }
+
+        self.assertTrue(Entrant.objects.get(pk=self.ent1.id).is_dnf )
+        response = self.client.post(reverse('race_unsetdnf', kwargs={"pk":self.race.id}), params)
+        self.assertFalse(Entrant.objects.get(pk=self.ent1.id).is_dnf)
+        self.assertTrue(Entrant.objects.get(pk=o_ent1.id).is_dnf )
