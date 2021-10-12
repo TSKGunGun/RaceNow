@@ -65,9 +65,9 @@ class RaceDetailView(DetailView):
         context["IsMember"] = self.object.is_member(self.request.user)
         context["Is_CanChangeRegulation"] = self.object.status.id < RaceStatus.RACE_STATUS_ENTRY
         context["Is_Entry"] = self.object.status.id == RaceStatus.RACE_STATUS_ENTRY
-        
+        context["Is_ShowEntrants"] = self.object.status.id >= RaceStatus.RACE_STATUS_ENTRY
         context["Is_canstart"] = (self.object.status.id == RaceStatus.RACE_STATUS_ENTRY and self.object.entrant_set.all().exists() )
-        
+
         context["Is_RaceHold"] = (self.object.status.id == RaceStatus.RACE_STATUS_HOLD)
         
         context["Is_ShowResult"] = (self.object.status.id >= RaceStatus.RACE_STATUS_HOLD)
@@ -422,3 +422,17 @@ def unsetDNF(request, pk):
         return redirect('input_result', pk=race.id)
 
     return redirect('input_result', pk=race.id)
+
+class EntrantIndexView(ListView):
+    model = Entrant
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["race"] = get_object_or_404(Race, pk=self.kwargs['pk'])
+
+        return context
+
+    def get_queryset(self, **kwargs):
+        race = get_object_or_404(Race, pk=self.kwargs['pk'])
+        qs = super().get_queryset().filter(race=race)
+        return qs

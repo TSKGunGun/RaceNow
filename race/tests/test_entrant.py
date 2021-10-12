@@ -203,3 +203,42 @@ class View_AddEntrant_Test(TestCase):
 
         self.assertNotEqual(response.status_code, 302)
         self.assertFalse(Race.objects.get(pk=self.race.id).entrant_set.all().exists())
+
+class Test_entrants_ListView(TestCase):    
+    fixtures = ['race_default.json']
+
+    def setUp(self) -> None:
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+        self.ent1 = EntrantFactory(race=self.race)
+        self.ent2 = EntrantFactory(race=self.race)
+    
+    def test_entrant_View(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('entrant_index', kwargs={'pk':self.race.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('race/entrant_list.html')
+        self.assertContains(response, text=self.ent1.team_name)
+        self.assertContains(response, text=self.ent2.team_name)
+    
+    def test_entrant_View_notmember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+
+        response = self.client.get(reverse('entrant_index', kwargs={'pk':self.race.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('race/entrant_list.html')
+        self.assertContains(response, text=self.ent1.team_name)
+        self.assertContains(response, text=self.ent2.team_name)
+
+    def test_entrant_view_notlogin(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('entrant_index', kwargs={'pk':self.race.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('race/entrant_list.html')
+        self.assertContains(response, text=self.ent1.team_name)
+        self.assertContains(response, text=self.ent2.team_name)
