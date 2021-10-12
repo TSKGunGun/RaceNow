@@ -17,6 +17,7 @@ from django.db import transaction
 from datetime import datetime
 import json
 import pytz
+import csv
 
 # Create your views here.
 @method_decorator(login_required, name='dispatch')
@@ -437,3 +438,38 @@ class EntrantIndexView(ListView):
         race = get_object_or_404(Race, pk=self.kwargs['pk'])
         qs = super().get_queryset().filter(race=race)
         return qs
+
+@login_required
+@require_POST
+def uploadEntrantCSVFile(request, pk):    
+    race = get_object_or_404(Race, pk=pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
+    
+    form = EntrantCSVUploadForm(request.POST, request.FILES)
+
+    if form.is_valid():
+        csv_data = form.cleaned_data["file"]
+        with transaction.atomic():
+            for line in csv_data:
+                if not Entrant.objects.filter(race=race).filter(num=line[0]).exists():
+                    ent = Entrant.objects.create(
+                        race = race,
+                        num = line[0],
+                        team_name = line[1]
+                    )
+
+                else :
+                    ent = get_object_or_404(Entrant, race=race, num=line[0])
+                    ent.team_name = line[1]
+                    ent.save()
+                    Entrant_Member.objects.filter(belonging=ent).delete()
+                                        
+                for member in line[2].split(','):
+                    Entrant_Member.objects.create(
+                        belonging = ent,
+                        name = member
+                    )
+        return redirect('entrant_index', pk=pk)
+
+    return redirect('entrant_index', pk=pk)

@@ -1,11 +1,14 @@
+from os import name
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from race.models import NumValidator, Race
 from race.forms import AddEntrantForm
+from racenow.settings import BASE_DIR
 from .factories import EntrantFactory, RaceFactory
 from account.tests.factories import UserFactory, OrganizerFactory
 from django.urls import reverse
-import json
+import json, os
 
 class AddEntrantForm_Input_Test(TestCase):
     fixtures = ['race_default.json']
@@ -242,3 +245,206 @@ class Test_entrants_ListView(TestCase):
         self.assertTemplateUsed('race/entrant_list.html')
         self.assertContains(response, text=self.ent1.team_name)
         self.assertContains(response, text=self.ent2.team_name)
+
+class Test_ImportEntrantCSVData(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self) -> None:
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+
+    def test_loadcsv(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv.csv')
+
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+
+        self.client.post(reverse('entrant_uploadCSV', kwargs={"pk":self.race.id}), params)           
+        
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.entrant_set.all().count(), 1)
+        ent = race.entrant_set.all()[0]
+        self.assertEqual(ent.num, '1')
+        self.assertEqual(ent.team_name, "Team_Test1")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider1-1")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider1-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider1-3")
+
+    def test_loadcsv_multiple(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_multiple.csv')
+
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+
+        self.client.post(reverse('entrant_uploadCSV', kwargs={"pk":self.race.id}), params)           
+        
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.entrant_set.all().count(), 3)
+        
+        ent = race.entrant_set.all()[0]
+        self.assertEqual(ent.num, '1')
+        self.assertEqual(ent.team_name, "Team_Test1")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider1-1")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider1-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider1-3")
+
+        ent = race.entrant_set.all()[1]
+        self.assertEqual(ent.num, '2')
+        self.assertEqual(ent.team_name, "Team_Test2")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider2-1")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider2-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider2-3")
+
+        ent = race.entrant_set.all()[2]
+        self.assertEqual(ent.num, '3')
+        self.assertEqual(ent.team_name, "Team_Test3")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider3-1")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider3-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider3-3")
+
+    def test_loadcsv_update(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_multiple.csv')
+
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+
+        self.client.post(reverse('entrant_uploadCSV', kwargs={"pk":self.race.id}), params)           
+        
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.entrant_set.all().count(), 3)
+
+        filepath2 = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_update.csv')
+        with open(filepath2) as f2:
+            dummyFile2 = SimpleUploadedFile(name=f2.name, content=bytes(f2.read(), encoding=f2.encoding))
+            params2 = {
+                "file" : dummyFile2
+            }
+
+        self.client.post(reverse('entrant_uploadCSV', kwargs={"pk":self.race.id}), params2)           
+        
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.entrant_set.all().count(), 3)
+        
+        ent = race.entrant_set.all()[0]
+        self.assertEqual(ent.num, '1')
+        self.assertEqual(ent.team_name, "Team_Test1")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider1-1")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider1-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider1-3")
+
+        ent = race.entrant_set.all()[1]
+        self.assertEqual(ent.num, '2')
+        self.assertEqual(ent.team_name, "Team_TestU2")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider2-1U")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider2-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider2-3")
+
+        ent = race.entrant_set.all()[2]
+        self.assertEqual(ent.num, '3')
+        self.assertEqual(ent.team_name, "Team_Test3")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider3-1")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider3-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider3-3")
+
+    def test_loadcsv_samenum(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_samenum.csv')
+
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+
+        self.client.post(reverse('entrant_uploadCSV', kwargs={"pk":self.race.id}), params)           
+        
+        race = Race.objects.get(pk=self.race.id)
+        self.assertEqual(race.entrant_set.all().count(), 2)
+        
+        ent = race.entrant_set.all()[0]
+        self.assertEqual(ent.num, '1')
+        self.assertEqual(ent.team_name, "Team_Test3")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider3-1")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider3-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider3-3")
+
+        ent = race.entrant_set.all()[1]
+        self.assertEqual(ent.num, '2')
+        self.assertEqual(ent.team_name, "Team_Test2")
+        self.assertEqual(ent.entrant_member_set.all().count(), 3)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, "Test_Rider2-1")
+        self.assertEqual(ent.entrant_member_set.all()[1].name, "Test_Rider2-2")
+        self.assertEqual(ent.entrant_member_set.all()[2].name, "Test_Rider2-3")
+
+    def test_loadcsv_notlogin(self):
+        self.client.logout()
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv.csv')
+
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+
+        response = self.client.post(reverse('entrant_uploadCSV', kwargs={"pk":self.race.id}), params)           
+        
+        race = Race.objects.get(pk=self.race.id)
+        self.assertFalse(race.entrant_set.all().exists())
+    
+    def test_loadcsv_notmember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv.csv')
+
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+
+        response = self.client.post(reverse('entrant_uploadCSV', kwargs={"pk":self.race.id}), params)           
+        
+        race = Race.objects.get(pk=self.race.id)
+        self.assertFalse(race.entrant_set.all().exists())
+        self.assertEqual(response.status_code, 403)
+    
+    def test_loadcsv_ErrorData(self):
+        self.client.logout()
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_NotInputMember.csv')
+
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+
+        self.client.post(reverse('entrant_uploadCSV', kwargs={"pk":self.race.id}), params)           
+        
+        race = Race.objects.get(pk=self.race.id)
+        self.assertFalse(race.entrant_set.all().exists())

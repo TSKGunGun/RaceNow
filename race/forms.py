@@ -6,7 +6,8 @@ from django.utils.safestring import mark_safe
 from .models import Category, Lap, Race, RaceType, Entrant
 from place.models import Place
 from django.forms.widgets import Select
-import json
+import json, csv
+import os
 
 class RaceTypeSelect(Select):
     def __init__(self, attrs=None, choices=(), queryset=None):
@@ -220,4 +221,41 @@ class EntrantCSVUploadForm(forms.Form):
     def clean_file(self):
         file = self.cleaned_data["file"]
 
-        return file
+        if os.path.splitext(file.name)[1] != ".csv" :
+            raise ValidationError(
+                message="CSVファイルではありません。"
+            )
+        
+        
+        #一回デコードしないとcsv化できない
+        buff_data = []
+        for line in file.readlines():
+            buff_data.append(line.decode())
+        
+        csvdata = csv.reader(buff_data, dialect=csv.excel)
+
+        #CSV形式データから列データに変換する(ファイルを閉じると参照切れになるため、ファイルとは別のメモリに退避させる)
+        cleaned_data = []
+        for row in csvdata:
+            if len(row) != 3 :
+                raise ValidationError(
+                    message="CSVファイルのフォーマットが異なります。(列が３列では有りません。)"
+                )
+            
+            if row[0] == "" :
+                raise ValidationError(
+                    message="CSVファイルにゼッケンNoが空の行があります。"
+                )
+            
+            if not str.isdecimal(row[0]) :
+                raise ValidationError(
+                    message="CSVファイルにゼッケンNoが数字ではない行があります。"
+                )
+
+            if row[2] == "" :
+                raise ValidationError(
+                    message="CSVファイルにメンバーが１人もない行があります。"
+                )
+
+            cleaned_data.append(row)
+        return cleaned_data
