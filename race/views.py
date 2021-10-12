@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.utils import timezone
-from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapForm
+from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapForm,EntrantCSVUploadForm
 from django.db import transaction
 from datetime import datetime
 import json
@@ -429,6 +429,7 @@ class EntrantIndexView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["race"] = get_object_or_404(Race, pk=self.kwargs['pk'])
+        context["csvuploadForm"] = EntrantCSVUploadForm
 
         return context
 

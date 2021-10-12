@@ -213,3 +213,11 @@ class LapForm(forms.ModelForm):
     class Meta:
         model = Lap
         fields = ("num",)
+
+class EntrantCSVUploadForm(forms.Form):
+    file = forms.FileField(required=True)
+
+    def clean_file(self):
+        file = self.cleaned_data["file"]
+
+        return file

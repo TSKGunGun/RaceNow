@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+{% load widget_tweaks %}
 
 {% block title %}エントラント一覧{% endblock %}
 
@@ -17,6 +18,17 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#EntrantDashItem" aria-controls="EntrantDashItem" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+        <div class="collapse navbar-collapse" id="EntrantDashItem">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item ms-2 mb-1">
+                    <a role="button" class="nav-link btn btn-success text-light" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
+                        <i class="bi bi-chevron-double-up"></i>
+                        CSV取り込み
+                    </a>
+                </li>
+　
+            </ul>
+        </div>
     </div>
 </nav>
 {% endblock %}
@@ -40,4 +52,33 @@
         {% endfor %}
     </table>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadCSVModalLabel">CSVデータ取り込み</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger">アップロードされたCSVファイルのデータを取り込みます。<br>
+                        ファイルフォーマットはサンプルファイルを参照してください。<br>
+                        すでに登録されているゼッケン番号の場合、チーム名、メンバー情報を更新します。
+                    </p>
+                    {% csrf_token %}
+                    <div class="my-3">
+                        {% render_field csvuploadForm.file type="file" class+="form-control" accept=".csv" %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">アップロード</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
