@@ -1,4 +1,3 @@
-from django.core.checks import messages
 from django.core.exceptions import PermissionDenied
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,7 +16,6 @@ from django.db import transaction
 from datetime import datetime
 import json
 import pytz
-import csv
 
 # Create your views here.
 @method_decorator(login_required, name='dispatch')
@@ -285,7 +283,12 @@ def addLap(request, pk):
             entrant = entrant,
             laptime = laptime
         )
+        messages.success(request, f"ゼッケンNo:{request.POST['num']}にラップを追加しました。")
         return redirect('input_result', pk=race.id)
+
+    for msgs in form.errors.values():
+        for msg in msgs :
+            messages.error(request, f"エラーのため、ラップ追加に失敗しました。{msg}")
 
     return redirect('input_result', pk=race.id)
 
@@ -310,7 +313,12 @@ def deleteLap(request, pk):
         lap = entrant.lap_set.order_by('-created_at').first()
         lap.delete()
 
+        messages.success(request, f"ゼッケンNo:{request.POST['num']}の最後のラップを削除しました。")
         return redirect('input_result', pk=race.id)
+
+    for msgs in form.errors.values():
+        for msg in msgs :
+            messages.error(request, f"エラーのため、ラップ削除に失敗しました。{msg}")
 
     return redirect('input_result', pk=race.id)
     
@@ -402,7 +410,12 @@ def setDNF(request, pk):
         entrant.is_dnf = True
         entrant.save()    
         
+        messages.success(request, f"ゼッケンNo:{request.POST['num']}をDNFに設定しました。")
         return redirect('input_result', pk=race.id)
+
+    for msgs in form.errors.values():
+        for msg in msgs :
+            messages.error(request, f"エラーのため、DNF設定に失敗しました。{msg}")
 
     return redirect('input_result', pk=race.id)
 
@@ -420,7 +433,12 @@ def unsetDNF(request, pk):
         entrant.is_dnf = False
         entrant.save()    
         
+        messages.success(request, f"ゼッケンNo:{request.POST['num']}のDNF設定を解除しました。")
         return redirect('input_result', pk=race.id)
+
+    for msgs in form.errors.values():
+        for msg in msgs :
+            messages.error(request, f"エラーのため、DNF設定解除に失敗しました。{msg}")
 
     return redirect('input_result', pk=race.id)
 
