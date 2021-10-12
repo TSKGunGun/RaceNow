@@ -17,7 +17,7 @@
     {% block append_head %}
     {% endblock %}
     {% bootstrap_javascript %}
-    <title>RaceNow|{% block title %}{% endblock %}</title>
+    <title>RaceNow  |  {% block title %}{% endblock %}</title>
 </head>
 <body class="h-100 {% block bodyclass %}{% endblock %}" style="padding:55px 0" {% block bodyattribute%}{% endblock %}>
     <div class="fixed-top">
@@ -76,19 +76,49 @@
     </div>
     {% endif %}
     
-    {% bootstrap_messages %}
-
     {% block contents %}
     {% endblock %}
 
     {% block footer %}
     {% endblock %}
-    
+    {% if messages %}
+    {% for msg in messages %}
+    <div class="toast end-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top:80px;">
+        <div class="toast-header text-light {% if msg.tags == 'error' %}bg-danger{% else %}bg-{{msg.tags}}{% endif %}">
+            {% if msg.tags == 'info' %}
+            <i class="bi bi-info-lg"></i>
+            <strong class="ms-2 me-auto">情報</strong>
+            {% elif msg.tags == 'success' %}
+            <i class="bi bi-check-lg"></i>
+            <strong class="ms-2 me-auto">処理完了</strong>
+            {% elif msg.tags == 'warning' %}
+            <i class="bi bi-exclamation-lg"></i>
+            <strong class="ms-2 me-auto">警告</strong>
+            {% elif msg.tags == 'error' %}
+            <i class="bi bi-x-lg"></i>
+            <strong class="ms-2 me-auto">エラー</strong>
+            {% endif %}
+            
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            {{ msg }}
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+
     {% block script %}
     {% endblock %}
-    
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v12.0" nonce="9uT86whK"></script>
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <script>
+    document.querySelectorAll('.toast')
+            .forEach(function (toastNode) {
+            var toast = new bootstrap.Toast(toastNode, {
+            autohide: true
+            })
+        toast.show()
+    })
+    </script>
 </body>
 </html>
