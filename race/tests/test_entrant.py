@@ -1,9 +1,8 @@
-from os import name
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from race.models import NumValidator, Race
-from race.forms import AddEntrantForm
+from race.forms import AddEntrantForm, EntrantCSVUploadForm
 from racenow.settings import BASE_DIR
 from .factories import EntrantFactory, RaceFactory
 from account.tests.factories import UserFactory, OrganizerFactory
@@ -252,7 +251,7 @@ class Test_ImportEntrantCSVData(TestCase):
     def setUp(self) -> None:
         self.user = UserFactory()
         self.org = OrganizerFactory(members=(self.user,))
-        self.race = RaceFactory(organizer=self.org)
+        self.race = RaceFactory(organizer=self.org, team_member_count_min=1, team_member_count_max=3)
 
     def test_loadcsv(self):
         self.client.logout()
@@ -448,3 +447,128 @@ class Test_ImportEntrantCSVData(TestCase):
         
         race = Race.objects.get(pk=self.race.id)
         self.assertFalse(race.entrant_set.all().exists())
+
+class Test_EntrantCSVUploadForm(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self) -> None:
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org, team_member_count_min=1, team_member_count_max=3)
+    
+    def test_valid_true(self):
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv.csv')
+        
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+        
+        form = EntrantCSVUploadForm(race=self.race, data=params, files=params)
+        self.assertTrue(form.is_valid())
+
+        data = form.cleaned_data["file"]
+        self.assertEqual(len(data), 1)
+        self.assertEqual(len(data[0]), 3)
+        self.assertEqual(data[0][0], '1')
+        self.assertEqual(data[0][1], 'Team_Test1')
+        self.assertEqual(data[0][2], 'Test_Rider1-1,Test_Rider1-2,Test_Rider1-3')
+    
+    def test_over_member(self):
+        race = RaceFactory(organizer=self.org, team_member_count_min=1, team_member_count_max=2)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv.csv')
+        
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+        
+        form = EntrantCSVUploadForm(race=race, data=params, files=params)
+        self.assertFalse(form.is_valid())
+        self.assertIn("メンバー数がチーム最大人数を超過しています。", form.errors["file"])
+
+    def test_under_member(self):
+        race = RaceFactory(organizer=self.org, team_member_count_min=4, team_member_count_max=5)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv.csv')
+        
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+        
+        form = EntrantCSVUploadForm(race=race, data=params, files=params)
+        self.assertFalse(form.is_valid())
+        self.assertIn("メンバー数がチーム最小人数を下回っています。", form.errors["file"])
+
+    def test_num_notdecimal(self):
+        race = RaceFactory(organizer=self.org, team_member_count_min=1, team_member_count_max=3)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_numnotdecimal.csv')
+        
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+        
+        form = EntrantCSVUploadForm(race=race, data=params, files=params)
+        self.assertFalse(form.is_valid())
+        self.assertIn("CSVファイルにゼッケンNoが数字ではない行があります。", form.errors["file"])
+
+    def test_num_empty(self):
+        race = RaceFactory(organizer=self.org, team_member_count_min=1, team_member_count_max=3)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_numempty.csv')
+        
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+        
+        form = EntrantCSVUploadForm(race=race, data=params, files=params)
+        self.assertFalse(form.is_valid())
+        self.assertIn("CSVファイルにゼッケンNoが空の行があります。", form.errors["file"])
+
+    def test_none_member(self):
+        race = RaceFactory(organizer=self.org, team_member_count_min=1, team_member_count_max=3)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_NotInputMember.csv')
+        
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+        
+        form = EntrantCSVUploadForm(race=race, data=params, files=params)
+        self.assertFalse(form.is_valid())
+        self.assertIn("CSVファイルにメンバーが１人もない行があります。", form.errors["file"])
+    
+    def test_notcsv(self):
+        race = RaceFactory(organizer=self.org, team_member_count_min=1, team_member_count_max=3)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv')
+        
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+        
+        form = EntrantCSVUploadForm(race=race, data=params, files=params)
+        self.assertFalse(form.is_valid())
+        self.assertIn("CSVファイルではありません。", form.errors["file"])
+
+    def test_unmatchformat(self):
+        race = RaceFactory(organizer=self.org, team_member_count_min=1, team_member_count_max=3)
+        filepath = os.path.join(BASE_DIR, 'race/tests/files/test_entrant/test_loadcsv_unmatchformat.csv')
+        
+        with open(filepath) as f:
+            dummyFile = SimpleUploadedFile(name=f.name, content=bytes(f.read(), encoding=f.encoding))
+            params = {
+                "file" : dummyFile
+            }
+        
+        form = EntrantCSVUploadForm(race=race, data=params, files=params)
+        self.assertFalse(form.is_valid())
+        self.assertIn("CSVファイルのフォーマットが異なります。(列が３列では有りません。)", form.errors["file"])

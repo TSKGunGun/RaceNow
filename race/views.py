@@ -446,7 +446,7 @@ def uploadEntrantCSVFile(request, pk):
     if not race.is_member(request.user) :
         raise PermissionDenied
     
-    form = EntrantCSVUploadForm(request.POST, request.FILES)
+    form = EntrantCSVUploadForm(race=race, data=request.POST, files=request.FILES)
 
     if form.is_valid():
         csv_data = form.cleaned_data["file"]

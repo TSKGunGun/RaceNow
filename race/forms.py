@@ -218,6 +218,10 @@ class LapForm(forms.ModelForm):
 class EntrantCSVUploadForm(forms.Form):
     file = forms.FileField(required=True)
 
+    def __init__(self, race=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.race = race
+
     def clean_file(self):
         file = self.cleaned_data["file"]
 
@@ -252,9 +256,20 @@ class EntrantCSVUploadForm(forms.Form):
                     message="CSVファイルにゼッケンNoが数字ではない行があります。"
                 )
 
-            if row[2] == "" :
+            members = row[2]
+            if members == "" :
                 raise ValidationError(
                     message="CSVファイルにメンバーが１人もない行があります。"
+                )
+            
+            if self.race.team_member_count_min > len(members.split(',')) :
+                raise ValidationError(
+                    message="メンバー数がチーム最小人数を下回っています。"
+                )
+
+            if self.race.team_member_count_max < len(members.split(',')) :
+                raise ValidationError(
+                    message="メンバー数がチーム最大人数を超過しています。"
                 )
 
             cleaned_data.append(row)
