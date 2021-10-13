@@ -1,10 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from race.models import NumValidator, Race
+from race.models import Entrant, NumValidator, Race
 from race.forms import EditEntrantForm, EntrantCSVUploadForm
 from racenow.settings import BASE_DIR
-from .factories import EntrantFactory, RaceFactory
+from .factories import Entrant_Member_Factory, EntrantFactory, RaceFactory
 from account.tests.factories import UserFactory, OrganizerFactory
 from django.urls import reverse
 import json, os
@@ -572,3 +572,89 @@ class Test_EntrantCSVUploadForm(TestCase):
         form = EntrantCSVUploadForm(race=race, data=params, files=params)
         self.assertFalse(form.is_valid())
         self.assertIn("CSVファイルのフォーマットが異なります。(列が３列では有りません。)", form.errors["file"])
+
+class View_EditEntrant_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self) -> None:
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+        self.ent1 = EntrantFactory(race=self.race)
+        self.em1 = Entrant_Member_Factory(belonging=self.ent1)
+
+    def test_get_EditEntrantPage(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        response = self.client.get(reverse('edit_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_getAddEntrantPage_NotLogin(self):
+        self.client.logout()
+        
+        response = self.client.get(reverse('edit_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_getAddEntrantPage_NotMember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+
+        response = self.client.get(reverse('edit_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_post_EditEntrantPage(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        member_name = "test_edit_01"
+
+        params = {
+            "team_name" : self.ent1.team_name + "_edit",
+            "num" :  self.ent1.num + "99",
+            "members" : json.dumps( { "0" : { "name" : member_name}})
+        }
+        self.assertNotEqual(self.ent1.entrant_member_set.all()[0].name, member_name)
+
+        response = self.client.post(reverse('edit_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}), params)
+        self.assertEqual(Race.objects.get(pk=self.race.id).entrant_set.all().count(), 1)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Race.objects.get(pk=self.race.id).entrant_set.all().count(), 1)
+
+        ent = Entrant.objects.get(pk=self.ent1.id)
+        self.assertEqual(ent.team_name, self.ent1.team_name+"_edit")
+        self.assertEqual(ent.num, self.ent1.num+"99")
+        self.assertEqual(ent.entrant_member_set.all()[0].name, member_name)
+    
+    def test_post_AddEntrantPage_notlogin(self):
+        self.client.logout()
+        
+        params = {
+            "team_name" : "Test",
+            "num" :  "55",
+            "members" : json.dumps( { "0" : { "name" : "test"}})
+        }
+
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).team_name, self.ent1.team_name )
+        response = self.client.post(reverse('edit_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}), params)
+
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).team_name, self.ent1.team_name )
+
+    def test_post_AddEntrantPage_notMember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+        
+        params = {
+            "team_name" : "Test",
+            "num" :  "55",
+            "members" : json.dumps( { "0" : { "name" : "test"}})
+        }
+
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).team_name, self.ent1.team_name )
+        response = self.client.post(reverse('edit_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}), params)
+
+        self.assertNotEqual(response.status_code, 302)
+        self.assertEqual(Entrant.objects.get(pk=self.ent1.id).team_name, self.ent1.team_name )
