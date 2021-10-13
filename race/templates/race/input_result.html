@@ -51,6 +51,26 @@
 {% endblock %}
 {% block contents %}
 <div style="margin-top: 100px;">
+    <div class="container-fluid bg-light" >
+        <div class="d-flex h-stack">
+            <div>
+                <table class="table m-0 border">
+                    <tr>
+                        <td class="bg-primary text-light">レース開始時間</td>
+                        <td><span style="font-family: 'Righteous', cursive;">{{ object.start_at|date:"H:i:s" }}</span></td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                <table class="table m-0 border">
+                    <tr>
+                        <td class="bg-primary text-light">レース経過時間</td>
+                        <td><span id="race_elapsedtime" style="font-family: 'Righteous', cursive;">0:0:0</span>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
     {% include 'race/parts_race_result.html' %}
 </div>
 
@@ -245,6 +265,17 @@ function numValidation(numElement, listElement ){
         
     }
 }
+
+setInterval(() => {
+    var ele_elapsedtime = document.querySelector('#race_elapsedtime');
+    var startTime = new Date("{{ object.start_at | date:'r' }}");
+
+    var diffTime = Date.now() - startTime.getTime();
+    var seconds = Math.floor(diffTime/1000)%60;
+    var minutes = Math.floor(diffTime/1000/60)%60;
+    var hours = Math.floor(diffTime/1000/60/60)%60;
+    ele_elapsedtime.innerText = hours + ":" + minutes + ":" + seconds;
+}, 1000);
 
 </script>
 <script src="{% static 'race/js/lapmodalform.js'%}"></script>
