@@ -196,6 +196,8 @@ class AddEntrantView(TemplateView):
                         belonging = entrant,
                         name = v["name"]
                     )
+            
+            messages.success(request, f"ゼッケンNo {entrant.num}のエントラントを追加しました。")
 
             return redirect('entrant_index', race.id)
         
@@ -258,6 +260,8 @@ class EditEntrantView(AddEntrantView):
                         belonging = entrant,
                         name = v["name"]
                     )
+
+            messages.success(request, f"ゼッケンNo {entrant.num}のエントラントの情報を更新しました。")
 
             return redirect('entrant_index', race.id)
         
