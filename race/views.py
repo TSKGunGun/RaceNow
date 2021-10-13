@@ -197,7 +197,7 @@ class AddEntrantView(TemplateView):
                         name = v["name"]
                     )
 
-            return redirect('race_detail', race.id)
+            return redirect('entrant_index', race.id)
         
         content = {
             "member_max": race.team_member_count_max,
@@ -446,10 +446,12 @@ class EntrantIndexView(ListView):
     model = Entrant
     
     def get_context_data(self, **kwargs):
+        race = get_object_or_404(Race, pk=self.kwargs['pk'])
         context = super().get_context_data(**kwargs)
-        context["race"] = get_object_or_404(Race, pk=self.kwargs['pk'])
+        context["race"] = race
         context["csvuploadForm"] = EntrantCSVUploadForm
-
+        context["IsMember"] = race.is_member(self.request.user)
+        context["Is_Entry"] = race.status.id == RaceStatus.RACE_STATUS_ENTRY
         return context
 
     def get_queryset(self, **kwargs):
