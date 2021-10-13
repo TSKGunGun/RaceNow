@@ -28,6 +28,16 @@
                         エントラント追加</button>
                 </li>
                 <li class="nav-item ms-2 mb-1">
+                    <button class="nav-link btn btn-info text-light" onclick="location.href='{% url "edit_entrant" race.id %}'">
+                        <i class="bi bi-person-lines-fill"></i>
+                        エントラント編集</button>
+                </li>
+                <li class="nav-item ms-2 mb-1">
+                    <button class="nav-link btn btn-danger text-light" onclick="location.href='{% url "delete_entrant" race.id %}'">
+                        <i class="bi bi-person-dash-fill"></i>
+                        エントラント削除</button>
+                </li>
+                <li class="nav-item ms-2 mb-1">
                     <button class="nav-link btn btn-success text-light" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
                         <i class="bi bi-chevron-double-up"></i>
                         CSV取り込み

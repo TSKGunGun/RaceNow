@@ -216,6 +216,25 @@ class AddEntrantView(TemplateView):
         
         return render(request, 'race/entrant_add.html', content)
 
+@method_decorator(login_required, name='dispatch')
+class EditEntrantView(AddEntrantView):
+    def get(self, request, *args, **kwargs) :
+        race = get_object_or_404(Race, pk=kwargs['pk'])
+        if not race.is_member(request.user) :
+            raise PermissionDenied
+        
+        content = {
+            "member_max": race.team_member_count_max,
+            "member_min": race.team_member_count_min,
+            "form" : AddEntrantForm,
+            "object" : race
+        }
+
+        return render(request, 'race/entrant_add.html', content)
+
+def deleteEntrant(request, pk):
+    pass
+
 @require_POST
 @login_required
 def fixedRegulation(request, pk):
