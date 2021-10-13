@@ -244,7 +244,7 @@ class EditEntrantView(AddEntrantView):
         if not race.is_member(request.user) :
             raise PermissionDenied
 
-        form = EditEntrantForm(race=race, data=request.POST)
+        form = EditEntrantForm(race=race, data=request.POST, instance=entrant)
         if form.is_valid() :
             decoder = json.JSONDecoder()
             members = decoder.decode(request.POST["members"])

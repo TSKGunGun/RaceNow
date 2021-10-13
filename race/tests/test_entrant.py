@@ -629,6 +629,53 @@ class View_EditEntrant_Test(TestCase):
         self.assertEqual(ent.num, self.ent1.num+"99")
         self.assertEqual(ent.entrant_member_set.all()[0].name, member_name)
     
+    def test_post_EditEntrantPage_samenum(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        
+        member_name = "test_edit_01"
+
+        params = {
+            "team_name" : self.ent1.team_name + "_edit",
+            "num" :  self.ent1.num,
+            "members" : json.dumps( { "0" : { "name" : member_name}})
+        }
+        self.assertNotEqual(self.ent1.entrant_member_set.all()[0].name, member_name)
+
+        response = self.client.post(reverse('edit_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}), params)
+        self.assertEqual(Race.objects.get(pk=self.race.id).entrant_set.all().count(), 1)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Race.objects.get(pk=self.race.id).entrant_set.all().count(), 1)
+
+        ent = Entrant.objects.get(pk=self.ent1.id)
+        self.assertEqual(ent.team_name, self.ent1.team_name+"_edit")
+        self.assertEqual(ent.num, self.ent1.num)
+        self.assertEqual(ent.entrant_member_set.all()[0].name, member_name)
+    
+    def test_post_EditEntrantPage_samenum_oherentrant(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+        ent2 = EntrantFactory(race=self.race)
+        
+        member_name = "test_edit_01"
+
+        params = {
+            "team_name" : self.ent1.team_name + "_edit",
+            "num" :  ent2.num,
+            "members" : json.dumps( { "0" : { "name" : member_name}})
+        }
+        self.assertNotEqual(self.ent1.entrant_member_set.all()[0].name, member_name)
+
+        response = self.client.post(reverse('edit_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}), params)
+        self.assertEqual(Race.objects.get(pk=self.race.id).entrant_set.all().count(), 2)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Race.objects.get(pk=self.race.id).entrant_set.all().count(), 2)
+
+        ent = Entrant.objects.get(pk=self.ent1.id)
+        self.assertNotEqual(ent.team_name, self.ent1.team_name+"_edit")
+        self.assertNotEqual(ent.num, ent2.num)
+        self.assertNotEqual(ent.entrant_member_set.all()[0].name, member_name)
+    
     def test_post_AddEntrantPage_notlogin(self):
         self.client.logout()
         

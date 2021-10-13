@@ -150,12 +150,16 @@ class EditEntrantForm(forms.ModelForm):
 
     def clean_num(self):
         num = self.cleaned_data["num"]
-        if self.race.entrant_set.filter(num=num).exists():
-            raise ValidationError(
-                message=f"入力したゼッケンNo: {num} は既に使用されています。"
-            )
-
-        return num
+        if not self.race.entrant_set.filter(num=num).exists():
+            return num
+        
+        #同じゼッケンNoが存在する場合、同じエントラントならOK
+        if self.instance and self.instance == self.race.entrant_set.get(num=num) :
+            return num
+            
+        raise ValidationError(
+                    message=f"入力したゼッケンNo: {num} は既に使用されています。"
+        )
 
     def clean_members(self):
         membersjson = self.cleaned_data["members"]
