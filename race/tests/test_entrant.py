@@ -658,3 +658,76 @@ class View_EditEntrant_Test(TestCase):
 
         self.assertNotEqual(response.status_code, 302)
         self.assertEqual(Entrant.objects.get(pk=self.ent1.id).team_name, self.ent1.team_name )
+
+
+class View_DeleteEntrant_Test(TestCase):
+    fixtures = ['race_default.json']
+
+    def setUp(self) -> None:
+        self.user = UserFactory()
+        self.org = OrganizerFactory(members=(self.user,))
+        self.race = RaceFactory(organizer=self.org)
+        self.ent1 = EntrantFactory(race=self.race)
+        self.em1 = Entrant_Member_Factory(belonging=self.ent1)
+
+        self.ent2 = EntrantFactory(race=self.race)
+        self.em2 = Entrant_Member_Factory(belonging=self.ent2)
+    
+    def test_access_get(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        self.assertEqual(self.race.entrant_set.all().count(), 2)
+        response = self.client.get(reverse('delete_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+        
+        self.assertNotEqual(self.race.entrant_set.all().count(), 1)
+        self.assertNotEqual(response.status_code, 302)
+
+    def test_access_get_notlogin(self):
+        self.client.logout()
+
+        self.assertEqual(self.race.entrant_set.all().count(), 2)
+        response = self.client.get(reverse('delete_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+        
+        self.assertNotEqual(self.race.entrant_set.all().count(), 1)
+        self.assertNotEqual(response.status_code, 302)
+
+    def test_access_get_notmember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+
+        self.assertEqual(self.race.entrant_set.all().count(), 2)
+        response = self.client.get(reverse('delete_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+        
+        self.assertNotEqual(self.race.entrant_set.all().count(), 1)
+        self.assertEqual(response.status_code, 405)
+
+    def test_post_delete(self):
+        self.client.logout()
+        self.client.force_login(self.user)
+
+        self.assertEqual(self.race.entrant_set.all().count(), 2)
+        response = self.client.post(reverse('delete_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+        
+        self.assertEqual(self.race.entrant_set.all().count(), 1)
+        self.assertEqual(response.status_code, 302)
+
+    def test_access_post_notlogin(self):
+        self.client.logout()
+
+        self.assertEqual(self.race.entrant_set.all().count(), 2)
+        response = self.client.get(reverse('delete_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+        
+        self.assertNotEqual(self.race.entrant_set.all().count(), 1)
+        self.assertNotEqual(response.status_code, 302)
+
+    def test_access_post_notmember(self):
+        self.client.logout()
+        self.client.force_login(UserFactory())
+
+        self.assertEqual(self.race.entrant_set.all().count(), 2)
+        response = self.client.post(reverse('delete_entrant', kwargs={"pk":self.race.id, "ent_pk":self.ent1.id}))
+        
+        self.assertNotEqual(self.race.entrant_set.all().count(), 1)
+        self.assertEqual(response.status_code, 403)
+    

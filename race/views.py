@@ -279,8 +279,21 @@ class EditEntrantView(AddEntrantView):
         
         return render(request, 'race/entrant_edit.html', content)
 
-def deleteEntrant(request, pk):
-    pass
+@require_POST
+@login_required
+def deleteEntrant(request, pk, ent_pk):
+    race = get_object_or_404(Race, pk=pk)
+    if not race.is_member(request.user) :
+        raise PermissionDenied
+
+    entrant = get_object_or_404(Entrant, pk=ent_pk)
+
+    num = entrant.num
+    entrant.delete()
+
+    messages.success(request, f"ゼッケンNo:{num}のエントラントの削除が完了しました。")
+
+    return redirect('entrant_index', race.id)
 
 @require_POST
 @login_required
