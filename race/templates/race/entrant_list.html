@@ -50,7 +50,9 @@
             <th class="text-center text-nowrap">ゼッケンNo</th>
             <th class="text-center text-nowrap">チーム名</th>
             <th class="text-center text-nowrap">メンバー名</th>
+            {% if IsMember %}
             <th class="text-center">アクション</th>
+            {% endif %}
         </tr>
         {% for item in entrant_list %}
         <tr>
@@ -58,18 +60,23 @@
             <td class="text-center">{{ item.num }}</td>
             <td class="text-center">{{ item.team_name }}</td>
             <td>{% for member in item.entrant_member_set.all %}{{ member.name }}{% if not forloop.last %} / {% endif %} {% endfor %}</td>
+            {% if IsMember %}
             <td>
                 <div class="d-flex justify-content-center">
                     <button class="nav-link btn btn-info text-light ms-2" onclick="location.href='{% url "edit_entrant" race.id item.id %}'">
                         <i class="bi bi-person-lines-fill"></i>
                         編集
                     </button>
+                    {% if Is_Entry %}
                     <button class="nav-link btn btn-danger text-light ms-2" data-num="{{item.num}}" data-target-url="{% url 'delete_entrant' race.id item.id %}" data-bs-toggle="modal" data-bs-target="#deleteEntrantModal" >
                         <i class="bi bi-person-dash-fill"></i>
                         削除
                     </button>
+                    {% endif %}
+                    
                 </div>
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>
