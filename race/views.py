@@ -488,6 +488,11 @@ def uploadEntrantCSVFile(request, pk):
                         belonging = ent,
                         name = member
                     )
+        messages.success(request, "CSV取り込みが完了しました。")
         return redirect('entrant_index', pk=pk)
+
+    for msgs in form.errors.values():
+        for msg in msgs :
+            messages.error(request, f"CSV取り込みでエラーが発生しました。{msg}")
 
     return redirect('entrant_index', pk=pk)
