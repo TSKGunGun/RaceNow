@@ -83,7 +83,7 @@
     {% endblock %}
     {% if messages %}
     {% for msg in messages %}
-    <div class="toast end-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top:80px; z-index: 5000;">
+    <div class="toast end-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; top:80px; z-index: 5000;">
         <div class="toast-header text-light {% if msg.tags == 'error' %}bg-danger{% else %}bg-{{msg.tags}}{% endif %}">
             {% if msg.tags == 'info' %}
             <i class="bi bi-info-lg"></i>
