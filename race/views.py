@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.utils import timezone
-from .forms import CreateRaceForm, Regulation_XC_Form, AddEntrantForm, LapForm,EntrantCSVUploadForm
+from .forms import CreateRaceForm, Regulation_XC_Form, EditEntrantForm, LapForm,EntrantCSVUploadForm
 from django.db import transaction
 from datetime import datetime
 import json
@@ -167,7 +167,7 @@ class AddEntrantView(TemplateView):
         content = {
             "member_max": race.team_member_count_max,
             "member_min": race.team_member_count_min,
-            "form" : AddEntrantForm,
+            "form" : EditEntrantForm,
             "object" : race
         }
 
@@ -178,7 +178,7 @@ class AddEntrantView(TemplateView):
         if not race.is_member(request.user) :
             raise PermissionDenied
 
-        form = AddEntrantForm(race=race, data=request.POST)
+        form = EditEntrantForm(race=race, data=request.POST)
         if form.is_valid() :
             decoder = json.JSONDecoder()
             members = decoder.decode(request.POST["members"])
@@ -223,14 +223,59 @@ class EditEntrantView(AddEntrantView):
         if not race.is_member(request.user) :
             raise PermissionDenied
         
+        entrant = get_object_or_404(Entrant, pk=kwargs['ent_pk'])
+        form = EditEntrantForm(instance=entrant)
         content = {
             "member_max": race.team_member_count_max,
             "member_min": race.team_member_count_min,
-            "form" : AddEntrantForm,
+            "form" : form,
             "object" : race
         }
 
-        return render(request, 'race/entrant_add.html', content)
+        return render(request, 'race/entrant_edit.html', content)
+    
+    
+    def post(self,request, *args, **kwargs) :
+        race = get_object_or_404(Race, pk=kwargs['pk'])
+        if not race.is_member(request.user) :
+            raise PermissionDenied
+
+        form = EditEntrantForm(race=race, data=request.POST)
+        if form.is_valid() :
+            decoder = json.JSONDecoder()
+            members = decoder.decode(request.POST["members"])
+            entrant = get_object_or_404(Entrant, pk=kwargs['ent_pk'])
+
+            with transaction.atomic():
+                Entrant_Member.objects.filter(belonging=entrant).delete()
+                entrant.team_name = form.cleaned_data.get("team_name")
+                entrant.num = form.cleaned_data.get("num")
+                entrant.save()
+                
+                for v in members.values():
+                    member = Entrant_Member.objects.create(
+                        belonging = entrant,
+                        name = v["name"]
+                    )
+
+            return redirect('entrant_index', race.id)
+        
+        content = {
+            "member_max": race.team_member_count_max,
+            "member_min": race.team_member_count_min,
+            "form" : form,
+            "object" : race
+        }
+
+        #memberは関連InputがHiddenなので一旦配列に格納しておく
+        if "members" in form.errors.keys():
+            members_error = []
+            for err in form.errors['members'] :
+                members_error.append(err)
+
+            content["members_error"] = members_error
+        
+        return render(request, 'race/entrant_edit.html', content)
 
 def deleteEntrant(request, pk):
     pass

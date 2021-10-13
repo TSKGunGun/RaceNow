@@ -128,11 +128,24 @@ class Regulation_XC_Form(forms.Form):
                 )
         return cleaned_data
 
-class AddEntrantForm(forms.ModelForm):
+class EditEntrantForm(forms.ModelForm):
     members = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, race=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        
+        if "instance" in kwargs :
+            members = {}
+            for member in kwargs["instance"].entrant_member_set.all():
+                members[str(len(members.keys()))] = { 'name' : member.name }
+            
+            j = json.dumps(members)
+            initial = {
+                'members': j
+            }
+            super().__init__(initial=initial, *args, **kwargs)
+        else :
+            super().__init__(*args, **kwargs)
+
         self.race = race
 
     def clean_num(self):

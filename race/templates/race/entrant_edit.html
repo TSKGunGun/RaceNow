@@ -6,18 +6,18 @@
 {% block append_head %}
 {% endblock %}
 
-{% block title %}エントラント追加{% endblock %}
+{% block title %}エントラント編集{% endblock %}
 
 {% block contents %}
 <div class="container py-3">
     <div class="row">
-        <p class="display-5">エントラント追加</p>    
+        <p class="display-5">エントラント編集</p>    
     </div>
     <form action="{% url 'add_entrant' pk=object.id %}" method="POST" >
         <div class="d-flex justity-content-between ">
             <span class="h5 me-auto">レース名 {{ object.name }}</span>
             <div class="ms-auto">
-                {% bootstrap_button type="submit" content="追加確定" %}
+                {% bootstrap_button type="submit" content="更新確定" %}
             </div>
         </div>
         <div class="card my-3">

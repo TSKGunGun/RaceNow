@@ -2,14 +2,14 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from race.models import NumValidator, Race
-from race.forms import AddEntrantForm, EntrantCSVUploadForm
+from race.forms import EditEntrantForm, EntrantCSVUploadForm
 from racenow.settings import BASE_DIR
 from .factories import EntrantFactory, RaceFactory
 from account.tests.factories import UserFactory, OrganizerFactory
 from django.urls import reverse
 import json, os
 
-class AddEntrantForm_Input_Test(TestCase):
+class EditEntrantForm_Input_Test(TestCase):
     fixtures = ['race_default.json']
 
     def setUp(self) -> None:
@@ -24,7 +24,7 @@ class AddEntrantForm_Input_Test(TestCase):
             "members" : json.dumps( { "0" : { "name" : "test"}})
         }
 
-        form = AddEntrantForm(race=self.race, data=params)
+        form = EditEntrantForm(race=self.race, data=params)
         self.assertTrue(form.is_valid())
 
     def test_no_input_teamname(self):
@@ -34,7 +34,7 @@ class AddEntrantForm_Input_Test(TestCase):
             "members" : json.dumps( { "0" : { "name" : "test"}})
         }
 
-        form = AddEntrantForm(race=self.race, data=params)
+        form = EditEntrantForm(race=self.race, data=params)
         self.assertTrue(form.is_valid())
 
     def test_no_input_Num(self):
@@ -44,7 +44,7 @@ class AddEntrantForm_Input_Test(TestCase):
             "members" : json.dumps( { "0" : { "name" : "test"}})
         }
 
-        form = AddEntrantForm(race=self.race, data=params )
+        form = EditEntrantForm(race=self.race, data=params )
         self.assertFalse(form.is_valid())
         self.assertIn('num', form.errors)
 
@@ -55,7 +55,7 @@ class AddEntrantForm_Input_Test(TestCase):
             "members" : ""
         }
 
-        form = AddEntrantForm(race=self.race, data=params)
+        form = EditEntrantForm(race=self.race, data=params)
         self.assertFalse(form.is_valid())
         self.assertIn('members', form.errors)
         self.assertEqual(form.errors["members"], ["メンバーが1名も追加されていません。"])
@@ -69,7 +69,7 @@ class AddEntrantForm_Input_Test(TestCase):
             "members" :  json.dumps( { "0" : { "name" : "test1"}, "1" : { "name" : "test2"} })
         }
 
-        form = AddEntrantForm(race=race, data=params)
+        form = EditEntrantForm(race=race, data=params)
         self.assertFalse(form.is_valid())
         self.assertIn('members', form.errors)
         self.assertEqual(form.errors["members"], ["メンバーが最大人数を超えています。"])
@@ -83,7 +83,7 @@ class AddEntrantForm_Input_Test(TestCase):
             "members" :  json.dumps( { "0" : { "name" : "test"}})
         }
 
-        form = AddEntrantForm(race=race, data=params)
+        form = EditEntrantForm(race=race, data=params)
         self.assertFalse(form.is_valid())
         self.assertIn('members', form.errors)
         self.assertEqual(form.errors["members"], ["メンバーが最少人数を満たしていません。"])
@@ -95,7 +95,7 @@ class AddEntrantForm_Input_Test(TestCase):
             "members" : json.dumps( { "0" : { "name" : "test"}})
         }
 
-        form = AddEntrantForm(race=self.race, data=params)
+        form = EditEntrantForm(race=self.race, data=params)
         self.assertFalse(form.is_valid())
         self.assertIn("num", form.errors)
 
@@ -108,7 +108,7 @@ class AddEntrantForm_Input_Test(TestCase):
             "members" : json.dumps( { "0" : { "name" : "test"}})
         }
     
-        form = AddEntrantForm(race=self.race, data=params)
+        form = EditEntrantForm(race=self.race, data=params)
         self.assertFalse(form.is_valid())
         self.assertIn('num', form.errors)
         self.assertEqual(form.errors["num"], [f"入力したゼッケンNo: {params['num']} は既に使用されています。"])
