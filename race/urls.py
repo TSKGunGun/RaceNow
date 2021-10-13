@@ -20,7 +20,7 @@ urlpatterns=[
     path('<int:pk>/entrants/', EntrantIndexView.as_view(), name="entrant_index"),
     path('<int:pk>/entrants/add', AddEntrantView.as_view(), name="add_entrant" ),
     path('<int:pk>/entrants/<int:ent_pk>/edit', EditEntrantView.as_view(), name="edit_entrant" ),
-    path('<int:pk>/entrants/delete', deleteEntrant, name="delete_entrant" ),
+    path('<int:pk>/entrants/<int:ent_pk>/delete', deleteEntrant, name="delete_entrant" ),
     path('<int:pk>/entrants/uploadEntrantCSVFile', uploadEntrantCSVFile, name="entrant_uploadCSV"),
 
     #InputResult

@@ -13,7 +13,7 @@
     <div class="row">
         <p class="display-5">エントラント編集</p>    
     </div>
-    <form action="{% url 'add_entrant' pk=object.id %}" method="POST" >
+    <form action="{% url 'edit_entrant' pk=object.id ent_pk=entrant.id %}" method="POST" >
         <div class="d-flex justity-content-between ">
             <span class="h5 me-auto">レース名 {{ object.name }}</span>
             <div class="ms-auto">

@@ -28,16 +28,6 @@
                         エントラント追加</button>
                 </li>
                 <li class="nav-item ms-2 mb-1">
-                    <button class="nav-link btn btn-info text-light" onclick="location.href='{% url "edit_entrant" race.id %}'">
-                        <i class="bi bi-person-lines-fill"></i>
-                        エントラント編集</button>
-                </li>
-                <li class="nav-item ms-2 mb-1">
-                    <button class="nav-link btn btn-danger text-light" onclick="location.href='{% url "delete_entrant" race.id %}'">
-                        <i class="bi bi-person-dash-fill"></i>
-                        エントラント削除</button>
-                </li>
-                <li class="nav-item ms-2 mb-1">
                     <button class="nav-link btn btn-success text-light" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
                         <i class="bi bi-chevron-double-up"></i>
                         CSV取り込み
@@ -60,6 +50,7 @@
             <th class="text-center text-nowrap">ゼッケンNo</th>
             <th class="text-center text-nowrap">チーム名</th>
             <th class="text-center text-nowrap">メンバー名</th>
+            <th class="text-center">アクション</th>
         </tr>
         {% for item in entrant_list %}
         <tr>
@@ -67,6 +58,18 @@
             <td class="text-center">{{ item.num }}</td>
             <td class="text-center">{{ item.team_name }}</td>
             <td>{% for member in item.entrant_member_set.all %}{{ member.name }}{% if not forloop.last %} / {% endif %} {% endfor %}</td>
+            <td>
+                <div class="d-flex justify-content-center">
+                    <button class="nav-link btn btn-info text-light ms-2" id="btn_editentrant" onclick="location.href='{% url "edit_entrant" race.id item.id %}'">
+                        <i class="bi bi-person-lines-fill"></i>
+                        編集
+                    </button>
+                    <button class="nav-link btn btn-danger text-light ms-2" id="btn_deleteentrant" onclick="location.href='{% url "delete_entrant" race.id item.id %}'">
+                        <i class="bi bi-person-dash-fill"></i>
+                        削除
+                    </button>
+                </div>
+            </td>
         </tr>
         {% endfor %}
     </table>
@@ -100,27 +103,4 @@
     </div>
 </div>
 
-{% endblock %}
-
-{% block script %}
-<script>
-var activeRow = -1;
-var select_entId = -1;
-var entrantTable = document.querySelector("#EntrantTable");
-Array.from(entrantTable.getElementsByTagName("tr")).forEach(element => {
-    element.addEventListener('click', function(event){
-        if(activeRow > 0){
-            entrantTable.rows[activeRow].classList.remove("bg-info");
-        }
-        if(element.rowIndex == 0 ) {
-            activeRow = -1;
-            select_entId = -1;
-        } else {
-            activeRow = element.rowIndex;
-            select_entId = element.cells[0].innerText;
-            element.classList.add("bg-info");
-        }
-    })    
-});
-</script>
 {% endblock %}

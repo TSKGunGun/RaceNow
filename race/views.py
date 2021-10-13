@@ -229,7 +229,8 @@ class EditEntrantView(AddEntrantView):
             "member_max": race.team_member_count_max,
             "member_min": race.team_member_count_min,
             "form" : form,
-            "object" : race
+            "object" : race,
+            "entrant" : entrant
         }
 
         return render(request, 'race/entrant_edit.html', content)
@@ -237,6 +238,7 @@ class EditEntrantView(AddEntrantView):
     
     def post(self,request, *args, **kwargs) :
         race = get_object_or_404(Race, pk=kwargs['pk'])
+        entrant = get_object_or_404(Entrant, pk=kwargs['ent_pk'])
         if not race.is_member(request.user) :
             raise PermissionDenied
 
@@ -244,8 +246,7 @@ class EditEntrantView(AddEntrantView):
         if form.is_valid() :
             decoder = json.JSONDecoder()
             members = decoder.decode(request.POST["members"])
-            entrant = get_object_or_404(Entrant, pk=kwargs['ent_pk'])
-
+            
             with transaction.atomic():
                 Entrant_Member.objects.filter(belonging=entrant).delete()
                 entrant.team_name = form.cleaned_data.get("team_name")
@@ -264,7 +265,8 @@ class EditEntrantView(AddEntrantView):
             "member_max": race.team_member_count_max,
             "member_min": race.team_member_count_min,
             "form" : form,
-            "object" : race
+            "object" : race,
+            "entrant" : entrant
         }
 
         #memberは関連InputがHiddenなので一旦配列に格納しておく
